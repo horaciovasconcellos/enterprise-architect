@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
-import { Buildings, ShareNetwork, Cube, House, List, Gear, FlowArrow } from '@phosphor-icons/react'
+import { Buildings, ShareNetwork, Cube, House, List, Gear, FlowArrow, User } from '@phosphor-icons/react'
 
-type ViewType = 'dashboard' | 'applications' | 'capabilities' | 'interfaces' | 'processes' | 'technologies'
+type ViewType = 'dashboard' | 'applications' | 'capabilities' | 'interfaces' | 'processes' | 'technologies' | 'owners'
 
 interface SidebarProps {
     open: boolean
@@ -47,6 +47,12 @@ export function Sidebar({ open, onToggle, activeView, onViewChange }: SidebarPro
             label: 'Interfaces',
             icon: ShareNetwork,
             description: 'Análise de Integração'
+        },
+        {
+            id: 'owners' as ViewType,
+            label: 'Proprietários',
+            icon: User,
+            description: 'Donos e Desenvolvedores'
         }
     ]
 
