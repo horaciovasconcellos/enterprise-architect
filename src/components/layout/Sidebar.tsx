@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
-import { Buildings, ShareNetwork, Cube, House, List } from '@phosphor-icons/react'
+import { Buildings, ShareNetwork, Cube, House, List, Gear, FlowArrow } from '@phosphor-icons/react'
 
-type ViewType = 'dashboard' | 'applications' | 'capabilities' | 'interfaces'
+type ViewType = 'dashboard' | 'applications' | 'capabilities' | 'interfaces' | 'processes' | 'technologies'
 
 interface SidebarProps {
     open: boolean
@@ -29,6 +29,18 @@ export function Sidebar({ open, onToggle, activeView, onViewChange }: SidebarPro
             label: 'Capabilities',
             icon: Buildings,
             description: 'Business Mapping'
+        },
+        {
+            id: 'processes' as ViewType,
+            label: 'Processes',
+            icon: FlowArrow,
+            description: 'Process Management'
+        },
+        {
+            id: 'technologies' as ViewType,
+            label: 'Technologies',
+            icon: Gear,
+            description: 'Technology Stack'
         },
         {
             id: 'interfaces' as ViewType,

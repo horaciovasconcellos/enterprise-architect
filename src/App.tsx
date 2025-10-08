@@ -4,9 +4,11 @@ import { Header } from './components/layout/Header'
 import { ApplicationsView } from './components/views/ApplicationsView'
 import { CapabilitiesView } from './components/views/CapabilitiesView'
 import { InterfacesView } from './components/views/InterfacesView'
+import { ProcessesView } from './components/views/ProcessesView'
+import { TechnologiesView } from './components/views/TechnologiesView'
 import { DashboardView } from './components/views/DashboardView'
 
-type ViewType = 'dashboard' | 'applications' | 'capabilities' | 'interfaces'
+type ViewType = 'dashboard' | 'applications' | 'capabilities' | 'interfaces' | 'processes' | 'technologies'
 
 function App() {
     const [activeView, setActiveView] = useState<ViewType>('dashboard')
@@ -18,6 +20,10 @@ function App() {
                 return <ApplicationsView />
             case 'capabilities':
                 return <CapabilitiesView />
+            case 'processes':
+                return <ProcessesView />
+            case 'technologies':
+                return <TechnologiesView />
             case 'interfaces':
                 return <InterfacesView />
             default:
