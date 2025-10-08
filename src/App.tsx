@@ -1,5 +1,46 @@
+import { useState } from 'react'
+import { Sidebar } from './components/layout/Sidebar'
+import { Header } from './components/layout/Header'
+import { ApplicationsView } from './components/views/ApplicationsView'
+import { CapabilitiesView } from './components/views/CapabilitiesView'
+import { InterfacesView } from './components/views/InterfacesView'
+import { DashboardView } from './components/views/DashboardView'
+
+type ViewType = 'dashboard' | 'applications' | 'capabilities' | 'interfaces'
+
 function App() {
-    return <div></div>
+    const [activeView, setActiveView] = useState<ViewType>('dashboard')
+    const [sidebarOpen, setSidebarOpen] = useState(true)
+
+    const renderView = () => {
+        switch (activeView) {
+            case 'applications':
+                return <ApplicationsView />
+            case 'capabilities':
+                return <CapabilitiesView />
+            case 'interfaces':
+                return <InterfacesView />
+            default:
+                return <DashboardView />
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-background">
+            <Sidebar 
+                open={sidebarOpen}
+                onToggle={() => setSidebarOpen(!sidebarOpen)}
+                activeView={activeView}
+                onViewChange={setActiveView}
+            />
+            <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
+                <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+                <main className="p-6">
+                    {renderView()}
+                </main>
+            </div>
+        </div>
+    )
 }
 
 export default App
