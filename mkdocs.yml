@@ -13,6 +13,7 @@ nav:
      - "Introdução"                                                   : "000-informacao/README.md"
      - "Política de Segurança"                                        : "000-informacao/SECURITY.md"
   - Requisitos:
+     - Prompt                                                         : "001-documentacao/PROMPT.md"
      - Documento de Requisitos do Produto (PRD)                       : "001-documentacao/PRD.md"
      - Database Setup                                                 : "001-documentacao/DATABASE_SETUP.md"
      - Passo a Passo                                                  : "001-documentacao/PASSO_A_PASSO.md"
