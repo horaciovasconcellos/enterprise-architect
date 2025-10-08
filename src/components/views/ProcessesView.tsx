@@ -250,17 +250,26 @@ export function ProcessesView() {
                                 
                                 {process.norms && process.norms.length > 0 && (
                                     <div className="mt-4">
-                                        <span className="text-sm font-medium text-muted-foreground">Normas:</span>
-                                        <div className="flex flex-wrap gap-1 mt-1">
-                                            {process.norms.slice(0, 2).map(norm => (
-                                                <Badge key={norm.id} variant="outline" className="text-xs">
-                                                    {norm.norma} - {norm.itemNorma}
-                                                </Badge>
-                                            ))}
-                                            {process.norms.length > 2 && (
-                                                <Badge variant="outline" className="text-xs">
-                                                    +{process.norms.length - 2} normas
-                                                </Badge>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm font-medium text-muted-foreground">Normas Associadas</span>
+                                            <Badge variant="secondary" className="text-xs">
+                                                {process.norms.length} norma{process.norms.length !== 1 ? 's' : ''}
+                                            </Badge>
+                                        </div>
+                                        <div className="space-y-1">
+                                            {process.norms.slice(0, 3).map(norm => (
+                                                <div key={norm.id} className="flex items-center gap-2 text-xs">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0"></div>
+                                                    <span className="font-medium text-foreground">{norm.norma}</span>
+                                                    <span className="text-muted-foreground">•</span>
+                                                    <span className="text-muted-foreground">{norm.itemNorma}</span>
+                                                </div>
+                                ))}
+                                            {process.norms.length > 3 && (
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-muted flex-shrink-0"></div>
+                                                    <span>+{process.norms.length - 3} norma{process.norms.length - 3 !== 1 ? 's' : ''} adiciona{process.norms.length - 3 !== 1 ? 'is' : 'l'}</span>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
