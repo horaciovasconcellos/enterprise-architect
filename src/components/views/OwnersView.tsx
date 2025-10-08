@@ -203,6 +203,45 @@ export function OwnersView() {
                 </TabsContent>
 
                 <TabsContent value="relationships" className="space-y-6 mt-6">
+                    {/* Debug Information */}
+                    <Card className="bg-muted/50">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Link size={18} />
+                                Status dos Dados
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-primary">{(owners || []).length}</div>
+                                    <div className="text-muted-foreground">Pessoas</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-primary">{(applications || []).length}</div>
+                                    <div className="text-muted-foreground">Aplicações</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-accent">{ownerRelationships.length}</div>
+                                    <div className="text-muted-foreground">Proprietários</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-accent">{developerRelationships.length}</div>
+                                    <div className="text-muted-foreground">Desenvolvedores</div>
+                                </div>
+                            </div>
+                            {((owners || []).length === 0 || (applications || []).length === 0) && (
+                                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                    <p className="text-sm text-yellow-800">
+                                        <strong>Para criar associações:</strong>
+                                        {(owners || []).length === 0 && " Cadastre pessoas na aba 'Proprietários'."}
+                                        {(applications || []).length === 0 && " Cadastre aplicações em 'Portfólio de Aplicações'."}
+                                    </p>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
                     {/* Relationships Section */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Owners Relationships */}
