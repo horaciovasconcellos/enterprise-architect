@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useCapabilities } from '@/hooks/useDatabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Plus, Buildings, FunnelSimple } from '@phosphor-icons/react'
+import { Plus, Buildings, FunnelSimple, Pencil, Trash } from '@phosphor-icons/react'
+import { CapabilityForm } from '@/components/forms/CapabilityForm'
+import { toast } from 'sonner'
 
 interface Capability {
     id: string
@@ -16,21 +18,35 @@ interface Capability {
 }
 
 export function CapabilitiesView() {
-    const [capabilities, setCapabilities] = useKV<Capability[]>('capabilities', [])
-    const [showForm, setShowForm] = useState(false)
+    const { capabilities, loading, error, refetch, deleteCapability } = useCapabilities()
+    const [isFormOpen, setIsFormOpen] = useState(false)
+    const [editingCapability, setEditingCapability] = useState<Capability | undefined>()
     const [filter, setFilter] = useState<string>('')
 
     const handleAddCapability = () => {
-        const name = prompt('Nome da Capacidade:')
-        if (name) {
-            const newCapability: Capability = {
-                id: Date.now().toString(),
-                name,
-                criticality: 'MÉDIA',
-                coverageScore: Math.floor(Math.random() * 100)
+        setEditingCapability(undefined)
+        setIsFormOpen(true)
+    }
+
+    const handleEditCapability = (capability: Capability) => {
+        setEditingCapability(capability)
+        setIsFormOpen(true)
+    }
+
+    const handleDeleteCapability = async (capability: Capability) => {
+        if (confirm(`Tem certeza que deseja excluir a capacidade "${capability.name}"?`)) {
+            try {
+                await deleteCapability(capability.id)
+                toast.success('Capacidade excluída com sucesso')
+            } catch (error) {
+                toast.error('Erro ao excluir capacidade')
+                console.error('Erro ao excluir capacidade:', error)
             }
-            setCapabilities((current) => [...(current || []), newCapability])
         }
+    }
+
+    const handleFormSuccess = () => {
+        refetch()
     }
 
     const filteredCapabilities = (capabilities || []).filter(cap =>
@@ -45,6 +61,22 @@ export function CapabilitiesView() {
             case 'MÉDIA': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
             default: return 'bg-green-500/10 text-green-700 border-green-500/20'
         }
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg">Carregando capacidades...</div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg text-red-600">Erro ao carregar capacidades: {error}</div>
+            </div>
+        )
     }
 
     return (
@@ -99,9 +131,27 @@ export function CapabilitiesView() {
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between">
                                     <CardTitle className="text-lg">{capability.name}</CardTitle>
-                                    <Badge className={getCriticalityColor(capability.criticality)}>
-                                        {capability.criticality}
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Badge className={getCriticalityColor(capability.criticality)}>
+                                            {capability.criticality}
+                                        </Badge>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleEditCapability(capability)}
+                                            >
+                                                <Pencil size={14} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDeleteCapability(capability)}
+                                            >
+                                                <Trash size={14} />
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </div>
                                 {capability.description && (
                                     <p className="text-sm text-muted-foreground line-clamp-2">
@@ -118,15 +168,24 @@ export function CapabilitiesView() {
                                     <Progress value={capability.coverageScore} />
                                 </div>
                                 
-                                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                                    <span>Aplicações</span>
-                                    <span>{Math.floor(Math.random() * 5) + 1} vinculadas</span>
-                                </div>
+                                {capability.parentId && (
+                                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                                        <span>Capacidade Pai</span>
+                                        <span>{(capabilities || []).find(c => c.id === capability.parentId)?.name || 'N/A'}</span>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     ))}
                 </div>
             )}
+
+            <CapabilityForm
+                capability={editingCapability}
+                isOpen={isFormOpen}
+                onClose={() => setIsFormOpen(false)}
+                onSuccess={handleFormSuccess}
+            />
         </div>
     )
 }

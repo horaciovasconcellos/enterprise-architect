@@ -1,23 +1,26 @@
-# ✨ Welcome to Your Spark Template!
-You've just launched your brand-new Spark Template Codespace — everything’s fired up and ready for you to explore, build, and create with Spark!
+# ✨ Bem-vindo ao seu modelo Spark!
+Você acabou de lançar seu novíssimo Spark Template Codespace — tudo está pronto para você explorar, construir e criar com o Spark!
 
-This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
+Este modelo é a sua tela em branco. 
 
-🚀 What's Inside?
-- A clean, minimal Spark environment
-- Pre-configured for local development
-- Ready to scale with your ideas
-  
-🧠 What Can You Do?
+Ele vem com uma configuração mínima para ajudar você a começar rapidamente com o desenvolvimento no Spark.
 
-Right now, this is just a starting point — the perfect place to begin building and testing your Spark applications.
+🚀 O que vem dentro?
+- Um ambiente Spark limpo e minimalista
+- Pré-configurado para desenvolvimento local
+- Pronto para escalar com suas ideias
 
-🧹 Just Exploring?
-No problem! If you were just checking things out and don’t need to keep this code:
+🧠 O que você pode fazer?
 
-- Simply delete your Spark.
-- Everything will be cleaned up — no traces left behind.
+Por enquanto, este é apenas um ponto de partida — o lugar perfeito para começar a construir e testar seus aplicativos Spark.
 
-📄 License For Spark Template Resources 
+🧹 Apenas explorando?
+Sem problemas! Se você estava apenas verificando as coisas e não precisa manter este código:
 
-The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
+- Basta excluir seu Spark.
+- Tudo será limpo — sem vestígios deixados para trás.
+
+📄 Licença para Recursos de Modelos do Spark
+
+Os arquivos e recursos de modelos do Spark do GitHub são licenciados sob os termos da licença MIT, Copyright GitHub, Inc.
+

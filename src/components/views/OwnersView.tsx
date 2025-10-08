@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useOwners, useApplications, useRelationships } from '@/hooks/useDatabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -26,9 +26,9 @@ interface Application {
 }
 
 export function OwnersView() {
-    const [owners, setOwners] = useKV<Owner[]>('owners', [])
-    const [relationships, setRelationships] = useKV<Relationship[]>('relationships', [])
-    const [applications] = useKV<Application[]>('applications', [])
+    const { owners, deleteOwner, refetch: refetchOwners } = useOwners()
+    const { applications, refetch: refetchApplications } = useApplications()
+    const { relationships, refetch: refetchRelationships } = useRelationships()
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [isRelationshipFormOpen, setIsRelationshipFormOpen] = useState(false)
     const [editingOwner, setEditingOwner] = useState<Owner | undefined>()
@@ -36,6 +36,10 @@ export function OwnersView() {
     const handleSubmit = (owner: Owner) => {
         setIsFormOpen(false)
         setEditingOwner(undefined)
+        // Refresh the owners list to show the changes
+        refetchOwners()
+        // Also refresh relationships to keep everything in sync
+        refetchRelationships()
     }
 
     const handleEdit = (owner: Owner) => {
@@ -43,37 +47,33 @@ export function OwnersView() {
         setIsFormOpen(true)
     }
 
-    const handleDelete = (ownerId: string) => {
+    const handleDelete = async (ownerId: string) => {
         if (confirm('Tem certeza que deseja excluir este proprietário?')) {
-            setOwners(currentOwners => (currentOwners || []).filter(o => o.id !== ownerId))
-            // Remove related relationships
-            setRelationships(currentRels => (currentRels || []).filter(r => r.ownerId !== ownerId))
-            toast.success('Proprietário excluído com sucesso')
+            try {
+                await deleteOwner(ownerId)
+                toast.success('Proprietário excluído com sucesso')
+            } catch (error) {
+                toast.error('Erro ao excluir proprietário')
+                console.error('Erro ao excluir proprietário:', error)
+            }
         }
     }
 
     const getOwnerRelationships = (ownerId: string) => {
         const ownerRels = (relationships || []).filter(r => r.ownerId === ownerId)
-        return ownerRels.map(rel => {
-            const app = (applications || []).find(a => a.id === rel.applicationId)
-            return {
-                ...rel,
-                applicationName: app?.name || 'Aplicação não encontrada'
-            }
-        })
+        return ownerRels.map(rel => ({
+            ...rel,
+            applicationName: rel.applicationName || 'Aplicação não encontrada'
+        }))
     }
 
     const getRelationshipsByType = (type: 'owner' | 'developer') => {
-        return (relationships || []).filter(r => r.type === type).map(rel => {
-            const owner = (owners || []).find(o => o.id === rel.ownerId)
-            const app = (applications || []).find(a => a.id === rel.applicationId)
-            return {
-                ...rel,
-                ownerName: owner?.nome || 'Proprietário não encontrado',
-                ownerMatricula: owner?.matricula || '',
-                applicationName: app?.name || 'Aplicação não encontrada'
-            }
-        })
+        return (relationships || []).filter(r => r.relationshipType === type).map(rel => ({
+            ...rel,
+            ownerName: rel.ownerName || 'Proprietário não encontrado',
+            ownerMatricula: rel.ownerMatricula || '',
+            applicationName: rel.applicationName || 'Aplicação não encontrada'
+        }))
     }
 
     const ownerRelationships = getRelationshipsByType('owner')
@@ -181,7 +181,7 @@ export function OwnersView() {
                                                         {ownerRels.slice(0, 2).map(rel => (
                                                             <div key={rel.id} className="mt-1 text-xs">
                                                                 <Badge variant="secondary" className="mr-1">
-                                                                    {rel.type === 'owner' ? 'Dono' : 'Dev'}
+                                                                    {rel.relationshipType === 'owner' ? 'Dono' : 'Dev'}
                                                                 </Badge>
                                                                 {rel.applicationName}
                                                             </div>
@@ -363,7 +363,7 @@ export function OwnersView() {
                                         ).map(([area, count]) => (
                                             <div key={area} className="flex justify-between items-center">
                                                 <span className="text-sm">{area}</span>
-                                                <Badge variant="outline">{count}</Badge>
+                                                <Badge variant="outline">{count as number}</Badge>
                                             </div>
                                         ))}
                                     </div>

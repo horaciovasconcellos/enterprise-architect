@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useApplications, useCapabilities, useProcesses, useTechnologies } from '@/hooks/useDatabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,6 +13,7 @@ interface Application {
     id: string
     name: string
     description?: string
+    repositoryUrl?: string
     lifecyclePhase: string
     criticality: string
     hostingType?: string
@@ -49,14 +50,15 @@ interface ApplicationFormProps {
 }
 
 export function ApplicationForm({ application, onSave, onCancel }: ApplicationFormProps) {
-    const [capabilities] = useKV<BusinessCapability[]>('capabilities', [])
-    const [processes] = useKV<Process[]>('processes', [])
-    const [technologies] = useKV<Technology[]>('technologies', [])
-    const [applications] = useKV<Application[]>('applications', [])
+    const { capabilities } = useCapabilities()
+    const { processes } = useProcesses()
+    const { technologies } = useTechnologies()
+    const { applications } = useApplications()
     
     const [formData, setFormData] = useState({
         name: application?.name || '',
         description: application?.description || '',
+        repositoryUrl: application?.repositoryUrl || '',
         lifecyclePhase: application?.lifecyclePhase || 'PRODUCAO',
         criticality: application?.criticality || 'MEDIA',
         hostingType: application?.hostingType || '',
@@ -141,6 +143,20 @@ export function ApplicationForm({ application, onSave, onCancel }: ApplicationFo
                                         placeholder="Breve descrição do propósito e funcionalidade da aplicação..."
                                         rows={3}
                                     />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="repositoryUrl">URL do Repositório</Label>
+                                    <Input
+                                        id="repositoryUrl"
+                                        value={formData.repositoryUrl || ''}
+                                        onChange={(e) => updateField('repositoryUrl', e.target.value)}
+                                        placeholder="ex: https://github.com/empresa/sistema-crm"
+                                        type="url"
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Link para o repositório no GitHub, Azure DevOps ou outro sistema de controle de versão
+                                    </p>
                                 </div>
                             </CardContent>
                         </Card>

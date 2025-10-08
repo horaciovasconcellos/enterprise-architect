@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useOwners, useApplications, useRelationships } from '@/hooks/useDatabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -30,9 +30,9 @@ interface RelationshipFormProps {
 }
 
 export function RelationshipForm({ onSuccess }: RelationshipFormProps) {
-    const [owners, setOwners] = useKV<Owner[]>('owners', [])
-    const [applications, setApplications] = useKV<Application[]>('applications', [])
-    const [relationships, setRelationships] = useKV<Relationship[]>('relationships', [])
+    const { owners, createOwner, refetch: refetchOwners } = useOwners()
+    const { applications, createApplication, refetch: refetchApplications } = useApplications()
+    const { relationships, createRelationship, refetch: refetchRelationships } = useRelationships()
     
     const [selectedOwner, setSelectedOwner] = useState('')
     const [selectedApplication, setSelectedApplication] = useState('')
@@ -54,35 +54,53 @@ export function RelationshipForm({ onSuccess }: RelationshipFormProps) {
     }, [owners, applications, relationships])
     
     const createTestData = async () => {
-        // Create test owner if none exist
-        if ((owners || []).length === 0) {
-            const testOwner: Owner = {
-                id: `owner-test-${Date.now()}`,
-                matricula: '12345',
-                nome: 'João Silva (Teste)',
-                area: 'Tecnologia da Informação',
-                createdAt: new Date().toISOString()
+        try {
+            let shouldRefetchOwners = false
+            let shouldRefetchApplications = false
+            
+            // Create test owner if none exist
+            if ((owners || []).length === 0) {
+                const testOwnerData = {
+                    matricula: '12345',
+                    nome: 'João Silva (Teste)',
+                    area: 'Tecnologia da Informação'
+                }
+                await createOwner(testOwnerData)
+                shouldRefetchOwners = true
+                toast.success('Proprietário de teste criado')
             }
-            setOwners([testOwner])
-            toast.success('Proprietário de teste criado')
-        }
-        
-        // Create test application if none exist
-        if ((applications || []).length === 0) {
-            const testApp: Application = {
-                id: `app-test-${Date.now()}`,
-                name: 'Sistema de Teste',
-                description: 'Aplicação criada para teste de associações',
-                lifecyclePhase: 'PRODUCAO',
-                criticality: 'MEDIA',
-                healthScore: 85
+            
+            // Create test application if none exist
+            if ((applications || []).length === 0) {
+                const testAppData = {
+                    name: 'Sistema de Teste',
+                    description: 'Aplicação criada para teste de associações',
+                    lifecyclePhase: 'PRODUCAO',
+                    criticality: 'MEDIA',
+                    hostingType: 'ON_PREMISE',
+                    healthScore: 85,
+                    technicalFit: 'ADEQUADO',
+                    functionalFit: 'ADEQUADO'
+                }
+                await createApplication(testAppData)
+                shouldRefetchApplications = true
+                toast.success('Aplicação de teste criada')
             }
-            setApplications([testApp])
-            toast.success('Aplicação de teste criada')
+            
+            // Refresh data if anything was created
+            if (shouldRefetchOwners) {
+                refetchOwners()
+            }
+            if (shouldRefetchApplications) {
+                refetchApplications()
+            }
+        } catch (error) {
+            toast.error('Erro ao criar dados de teste')
+            console.error('Erro ao criar dados de teste:', error)
         }
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         
         if (!selectedOwner || !selectedApplication) {
@@ -90,40 +108,38 @@ export function RelationshipForm({ onSuccess }: RelationshipFormProps) {
             return
         }
 
-        // Check if relationship already exists
-        const existingRelationship = (relationships || []).find(r => 
-            r.ownerId === selectedOwner && 
-            r.applicationId === selectedApplication && 
-            r.type === relationshipType
-        )
+        try {
+            const relationshipData = {
+                ownerId: selectedOwner,
+                applicationId: selectedApplication,
+                relationshipType: relationshipType
+            }
 
-        if (existingRelationship) {
-            toast.error('Esta associação já existe')
-            return
+            await createRelationship(relationshipData)
+            
+            const owner = (owners || []).find(o => o.id === selectedOwner)
+            const app = (applications || []).find(a => a.id === selectedApplication)
+            const typeLabel = relationshipType === 'owner' ? 'proprietário' : 'desenvolvedor'
+            
+            toast.success(`Associação criada: ${owner?.nome} como ${typeLabel} de ${app?.name}`)
+            
+            // Reset form
+            setSelectedOwner('')
+            setSelectedApplication('')
+            setRelationshipType('owner')
+            
+            // Refresh relationships list
+            refetchRelationships()
+            
+            onSuccess?.()
+        } catch (error) {
+            if (error instanceof Error && error.message === 'Relacionamento já existe') {
+                toast.error('Esta associação já existe')
+            } else {
+                toast.error('Erro ao criar associação')
+                console.error('Erro ao criar relacionamento:', error)
+            }
         }
-
-        const newRelationship: Relationship = {
-            id: `rel-${Date.now()}`,
-            type: relationshipType,
-            ownerId: selectedOwner,
-            applicationId: selectedApplication,
-            createdAt: new Date().toISOString()
-        }
-
-        setRelationships(currentRels => [...(currentRels || []), newRelationship])
-        
-        const owner = (owners || []).find(o => o.id === selectedOwner)
-        const app = (applications || []).find(a => a.id === selectedApplication)
-        const typeLabel = relationshipType === 'owner' ? 'proprietário' : 'desenvolvedor'
-        
-        toast.success(`Associação criada: ${owner?.nome} como ${typeLabel} de ${app?.name}`)
-        
-        // Reset form
-        setSelectedOwner('')
-        setSelectedApplication('')
-        setRelationshipType('owner')
-        
-        onSuccess?.()
     }
 
     return (

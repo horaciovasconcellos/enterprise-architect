@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useApplications } from '@/hooks/useDatabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -26,27 +26,24 @@ interface Application {
 }
 
 export function ApplicationsView() {
-    const [applications, setApplications] = useKV<Application[]>('applications', [])
+    const { applications, loading, error, createApplication, updateApplication, deleteApplication } = useApplications()
     const [showForm, setShowForm] = useState(false)
     const [editingApp, setEditingApp] = useState<Application | null>(null)
     const [filter, setFilter] = useState<string>('')
 
-    const handleSaveApplication = (appData: Omit<Application, 'id'>) => {
-        if (editingApp) {
-            setApplications((current) =>
-                (current || []).map((app) =>
-                    app.id === editingApp.id ? { ...appData, id: editingApp.id } : app
-                )
-            )
-        } else {
-            const newApp: Application = {
-                ...appData,
-                id: Date.now().toString()
+    const handleSaveApplication = async (appData: Omit<Application, 'id'>) => {
+        try {
+            if (editingApp) {
+                await updateApplication(editingApp.id, appData)
+            } else {
+                await createApplication(appData)
             }
-            setApplications((current) => [...(current || []), newApp])
+            setShowForm(false)
+            setEditingApp(null)
+        } catch (error) {
+            console.error('Erro ao salvar aplicação:', error)
+            // Aqui você pode adicionar uma notificação de erro se quiser
         }
-        setShowForm(false)
-        setEditingApp(null)
     }
 
     const handleEditApplication = (app: Application) => {
@@ -113,6 +110,22 @@ export function ApplicationsView() {
                     setEditingApp(null)
                 }}
             />
+        )
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg">Carregando aplicações...</div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg text-red-600">Erro ao carregar aplicações: {error}</div>
+            </div>
         )
     }
 
