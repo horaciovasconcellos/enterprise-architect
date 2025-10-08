@@ -19,6 +19,8 @@ interface Process {
     frequency?: string
     duration?: string
     complexity?: string
+    norma?: string
+    itemNorma?: string
 }
 
 export function ProcessesView() {
@@ -209,6 +211,18 @@ export function ProcessesView() {
                                         <div>
                                             <span className="font-medium text-muted-foreground">Área:</span>
                                             <p className="text-foreground">{process.categoryId}</p>
+                                        </div>
+                                    )}
+                                    {process.norma && (
+                                        <div>
+                                            <span className="font-medium text-muted-foreground">Norma:</span>
+                                            <p className="text-foreground">{process.norma}</p>
+                                        </div>
+                                    )}
+                                    {process.itemNorma && (
+                                        <div>
+                                            <span className="font-medium text-muted-foreground">Item da Norma:</span>
+                                            <p className="text-foreground">{process.itemNorma}</p>
                                         </div>
                                     )}
                                 </div>
