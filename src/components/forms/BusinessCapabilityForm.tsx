@@ -36,7 +36,7 @@ export function BusinessCapabilityForm({ capability, onSave, onCancel, available
         name: capability?.name || '',
         description: capability?.description || '',
         level: capability?.level || 1,
-        parentId: capability?.parentId || '',
+        parentId: capability?.parentId ? capability.parentId : 'none',  // Convert empty to 'none' for select
         maturityLevel: capability?.maturityLevel || 'DEFINED',
         businessImportance: capability?.businessImportance || 'MEDIUM',
         investmentPriority: capability?.investmentPriority || 'MEDIUM',
@@ -49,7 +49,12 @@ export function BusinessCapabilityForm({ capability, onSave, onCancel, available
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        onSave(formData)
+        // Convert "none" to empty string for parent ID
+        const submitData = {
+            ...formData,
+            parentId: formData.parentId === 'none' ? '' : formData.parentId
+        }
+        onSave(submitData)
     }
 
     const updateField = (field: string, value: any) => {
@@ -130,7 +135,7 @@ export function BusinessCapabilityForm({ capability, onSave, onCancel, available
                                                 <SelectValue placeholder="Select parent capability" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="">None (Top Level)</SelectItem>
+                                                <SelectItem value="none">None (Top Level)</SelectItem>
                                                 {possibleParents.map((parent) => (
                                                     <SelectItem key={parent.id} value={parent.id}>
                                                         {parent.name}

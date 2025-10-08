@@ -195,7 +195,7 @@ export function RelationshipForm({ onSuccess }: RelationshipFormProps) {
                                         </SelectItem>
                                     ))
                                 ) : (
-                                    <SelectItem value="" disabled>
+                                    <SelectItem value="no-owners" disabled>
                                         Nenhum proprietário encontrado
                                     </SelectItem>
                                 )}
@@ -235,7 +235,7 @@ export function RelationshipForm({ onSuccess }: RelationshipFormProps) {
                                         </SelectItem>
                                     ))
                                 ) : (
-                                    <SelectItem value="" disabled>
+                                    <SelectItem value="no-applications" disabled>
                                         Nenhuma aplicação encontrada
                                     </SelectItem>
                                 )}
