@@ -21,15 +21,15 @@ export function InterfacesView() {
     const [filter, setFilter] = useState<string>('')
 
     const handleAddInterface = () => {
-        const sourceApp = prompt('Source Application:')
-        const targetApp = prompt('Target Application:')
+        const sourceApp = prompt('Aplicação de Origem:')
+        const targetApp = prompt('Aplicação de Destino:')
         if (sourceApp && targetApp) {
             const newInterface: Interface = {
                 id: Date.now().toString(),
                 sourceApp,
                 targetApp,
                 type: 'API_REST',
-                frequency: 'REAL_TIME'
+                frequency: 'TEMPO_REAL'
             }
             setInterfaces((current) => [...(current || []), newInterface])
         }
@@ -53,10 +53,10 @@ export function InterfacesView() {
 
     const getFrequencyColor = (frequency: string) => {
         switch (frequency) {
-            case 'REAL_TIME': return 'bg-red-500/10 text-red-700 border-red-500/20'
-            case 'NEAR_REAL_TIME': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
-            case 'HOURLY': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
-            case 'DAILY': return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
+            case 'TEMPO_REAL': return 'bg-red-500/10 text-red-700 border-red-500/20'
+            case 'QUASE_TEMPO_REAL': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
+            case 'HORÁRIO': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
+            case 'DIÁRIO': return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
             default: return 'bg-gray-500/10 text-gray-700 border-gray-500/20'
         }
     }
@@ -65,12 +65,12 @@ export function InterfacesView() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">System Interfaces</h1>
-                    <p className="text-muted-foreground">Manage integrations and data flows between applications</p>
+                    <h1 className="text-3xl font-bold text-foreground mb-2">Interfaces de Sistema</h1>
+                    <p className="text-muted-foreground">Gerencie integrações e fluxos de dados entre aplicações</p>
                 </div>
                 <Button onClick={handleAddInterface} className="gap-2">
                     <Plus size={16} />
-                    Add Interface
+                    Adicionar Interface
                 </Button>
             </div>
 
@@ -79,32 +79,32 @@ export function InterfacesView() {
                     <FunnelSimple size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
                     <input
                         type="text"
-                        placeholder="Filter interfaces..."
+                        placeholder="Filtrar interfaces..."
                         className="w-full pl-9 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                     />
                 </div>
                 <div className="text-sm text-muted-foreground">
-                    {filteredInterfaces.length} of {(interfaces || []).length} interfaces
+                    {filteredInterfaces.length} de {(interfaces || []).length} interfaces
                 </div>
             </div>
 
             {filteredInterfaces.length === 0 && (interfaces || []).length === 0 ? (
                 <div className="text-center py-16">
                     <ShareNetwork size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <h3 className="text-lg font-medium text-foreground mb-2">No interfaces yet</h3>
-                    <p className="text-muted-foreground mb-6">Start mapping system integrations and data flows.</p>
+                    <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma interface ainda</h3>
+                    <p className="text-muted-foreground mb-6">Comece mapeando integrações de sistema e fluxos de dados.</p>
                     <Button onClick={handleAddInterface} className="gap-2">
                         <Plus size={16} />
-                        Add Your First Interface
+                        Adicionar Sua Primeira Interface
                     </Button>
                 </div>
             ) : filteredInterfaces.length === 0 ? (
                 <div className="text-center py-16">
                     <FunnelSimple size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <h3 className="text-lg font-medium text-foreground mb-2">No matching interfaces</h3>
-                    <p className="text-muted-foreground">Try adjusting your search criteria.</p>
+                    <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma interface encontrada</h3>
+                    <p className="text-muted-foreground">Tente ajustar seus critérios de busca.</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -149,31 +149,31 @@ export function InterfacesView() {
             {(interfaces || []).length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Interface Statistics</CardTitle>
+                        <CardTitle>Estatísticas de Interface</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-foreground">{(interfaces || []).length}</div>
-                                <div className="text-sm text-muted-foreground">Total Interfaces</div>
+                                <div className="text-sm text-muted-foreground">Total de Interfaces</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-foreground">
                                     {(interfaces || []).filter(i => i.type === 'API_REST').length}
                                 </div>
-                                <div className="text-sm text-muted-foreground">REST APIs</div>
+                                <div className="text-sm text-muted-foreground">APIs REST</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-foreground">
-                                    {(interfaces || []).filter(i => i.frequency === 'REAL_TIME').length}
+                                    {(interfaces || []).filter(i => i.frequency === 'TEMPO_REAL').length}
                                 </div>
-                                <div className="text-sm text-muted-foreground">Real-time</div>
+                                <div className="text-sm text-muted-foreground">Tempo Real</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-foreground">
                                     {new Set([...(interfaces || []).map(i => i.sourceApp), ...(interfaces || []).map(i => i.targetApp)]).size}
                                 </div>
-                                <div className="text-sm text-muted-foreground">Connected Apps</div>
+                                <div className="text-sm text-muted-foreground">Apps Conectadas</div>
                             </div>
                         </div>
                     </CardContent>

@@ -52,53 +52,53 @@ export function DashboardView() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">Enterprise Architecture Dashboard</h1>
-                <p className="text-muted-foreground">Overview of your application portfolio, capabilities, and integrations</p>
+                <h1 className="text-3xl font-bold text-foreground mb-2">Painel de Arquitetura Empresarial</h1>
+                <p className="text-muted-foreground">Visão geral do seu portfólio de aplicações, capacidades e integrações</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+                        <CardTitle className="text-sm font-medium">Total de Aplicações</CardTitle>
                         <Cube size={16} className="text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{totalApps}</div>
                         <p className="text-xs text-muted-foreground">
-                            {criticalApps} critical systems
+                            {criticalApps} sistemas críticos
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Business Capabilities</CardTitle>
+                        <CardTitle className="text-sm font-medium">Capacidades de Negócio</CardTitle>
                         <Buildings size={16} className="text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{(capabilities || []).length}</div>
                         <p className="text-xs text-muted-foreground">
-                            {criticalCapabilities} critical capabilities
+                            {criticalCapabilities} capacidades críticas
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">System Interfaces</CardTitle>
+                        <CardTitle className="text-sm font-medium">Interfaces de Sistema</CardTitle>
                         <ShareNetwork size={16} className="text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{totalInterfaces}</div>
                         <p className="text-xs text-muted-foreground">
-                            Integration points
+                            Pontos de integração
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Avg Health Score</CardTitle>
+                        <CardTitle className="text-sm font-medium">Saúde Média</CardTitle>
                         <Warning size={16} className="text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -111,14 +111,14 @@ export function DashboardView() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Recent Applications</CardTitle>
+                        <CardTitle>Aplicações Recentes</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {(applications || []).length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground">
                                 <Cube size={48} className="mx-auto mb-4 opacity-50" />
-                                <p>No applications registered yet</p>
-                                <p className="text-sm">Start by adding your first application</p>
+                                <p>Nenhuma aplicação registrada ainda</p>
+                                <p className="text-sm">Comece adicionando sua primeira aplicação</p>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -127,7 +127,7 @@ export function DashboardView() {
                                         <div>
                                             <div className="font-medium">{app.name}</div>
                                             <div className="text-sm text-muted-foreground">
-                                                Health: {app.healthScore || 0}%
+                                                Saúde: {app.healthScore || 0}%
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -147,19 +147,19 @@ export function DashboardView() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Capability Coverage</CardTitle>
+                        <CardTitle>Cobertura de Capacidades</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {(capabilities || []).length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground">
                                 <Buildings size={48} className="mx-auto mb-4 opacity-50" />
-                                <p>No capabilities defined yet</p>
-                                <p className="text-sm">Map your business capabilities first</p>
+                                <p>Nenhuma capacidade definida ainda</p>
+                                <p className="text-sm">Mapeie suas capacidades de negócio primeiro</p>
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm font-medium">Average Coverage</span>
+                                    <span className="text-sm font-medium">Cobertura Média</span>
                                     <span className="text-sm text-muted-foreground">{Math.round(avgCoverageScore)}%</span>
                                 </div>
                                 <Progress value={avgCoverageScore} />

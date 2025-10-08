@@ -14,39 +14,39 @@ export function Sidebar({ open, onToggle, activeView, onViewChange }: SidebarPro
     const menuItems = [
         {
             id: 'dashboard' as ViewType,
-            label: 'Dashboard',
+            label: 'Painel',
             icon: House,
-            description: 'Overview & Insights'
+            description: 'Visão Geral & Insights'
         },
         {
             id: 'applications' as ViewType,
-            label: 'Applications',
+            label: 'Aplicações',
             icon: Cube,
-            description: 'Portfolio Management'
+            description: 'Gestão de Portfólio'
         },
         {
             id: 'capabilities' as ViewType,
-            label: 'Capabilities',
+            label: 'Capacidades',
             icon: Buildings,
-            description: 'Business Mapping'
+            description: 'Mapeamento de Negócio'
         },
         {
             id: 'processes' as ViewType,
-            label: 'Processes',
+            label: 'Processos',
             icon: FlowArrow,
-            description: 'Process Management'
+            description: 'Gestão de Processos'
         },
         {
             id: 'technologies' as ViewType,
-            label: 'Technologies',
+            label: 'Tecnologias',
             icon: Gear,
-            description: 'Technology Stack'
+            description: 'Stack Tecnológico'
         },
         {
             id: 'interfaces' as ViewType,
             label: 'Interfaces',
             icon: ShareNetwork,
-            description: 'Integration Analysis'
+            description: 'Análise de Integração'
         }
     ]
 
@@ -68,7 +68,7 @@ export function Sidebar({ open, onToggle, activeView, onViewChange }: SidebarPro
                     {open && (
                         <div>
                             <h1 className="font-bold text-lg text-foreground">60pportunities</h1>
-                            <p className="text-sm text-muted-foreground">Enterprise Architecture</p>
+                            <p className="text-sm text-muted-foreground">Arquitetura Empresarial</p>
                         </div>
                     )}
                 </div>

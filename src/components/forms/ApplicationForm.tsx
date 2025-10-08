@@ -31,8 +31,8 @@ export function ApplicationForm({ application, onSave, onCancel }: ApplicationFo
     const [formData, setFormData] = useState({
         name: application?.name || '',
         description: application?.description || '',
-        lifecyclePhase: application?.lifecyclePhase || 'PRODUCTION',
-        criticality: application?.criticality || 'MEDIUM',
+        lifecyclePhase: application?.lifecyclePhase || 'PRODUÇÃO',
+        criticality: application?.criticality || 'MÉDIA',
         hostingType: application?.hostingType || '',
         healthScore: application?.healthScore || 85,
         technicalFit: application?.technicalFit || '',
@@ -58,10 +58,10 @@ export function ApplicationForm({ application, onSave, onCancel }: ApplicationFo
                 </Button>
                 <div>
                     <h1 className="text-3xl font-bold text-foreground">
-                        {application ? 'Edit Application' : 'New Application'}
+                        {application ? 'Editar Aplicação' : 'Nova Aplicação'}
                     </h1>
                     <p className="text-muted-foreground">
-                        {application ? 'Update application details and metadata' : 'Add a new application to your portfolio'}
+                        {application ? 'Atualize detalhes e metadados da aplicação' : 'Adicione uma nova aplicação ao seu portfólio'}
                     </p>
                 </div>
             </div>
@@ -71,11 +71,11 @@ export function ApplicationForm({ application, onSave, onCancel }: ApplicationFo
                     <div className="lg:col-span-2 space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Basic Information</CardTitle>
+                                <CardTitle>Informações Básicas</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
-                                    <Label htmlFor="name">Application Name</Label>
+                                    <Label htmlFor="name">Nome da Aplicação</Label>
                                     <Input
                                         id="name"
                                         value={formData.name}

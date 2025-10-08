@@ -91,12 +91,12 @@ export function ApplicationsView() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">Application Portfolio</h1>
-                    <p className="text-muted-foreground">Manage your enterprise application inventory and lifecycle</p>
+                    <h1 className="text-3xl font-bold text-foreground mb-2">Portfólio de Aplicações</h1>
+                    <p className="text-muted-foreground">Gerencie o inventário e ciclo de vida das aplicações empresariais</p>
                 </div>
                 <Button onClick={() => setShowForm(true)} className="gap-2">
                     <Plus size={16} />
-                    Add Application
+                    Adicionar Aplicação
                 </Button>
             </div>
 
@@ -105,32 +105,32 @@ export function ApplicationsView() {
                     <FunnelSimple size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
                     <input
                         type="text"
-                        placeholder="Filter applications..."
+                        placeholder="Filtrar aplicações..."
                         className="w-full pl-9 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                     />
                 </div>
                 <div className="text-sm text-muted-foreground">
-                    {filteredApplications.length} of {(applications || []).length} applications
+                    {filteredApplications.length} de {(applications || []).length} aplicações
                 </div>
             </div>
 
             {filteredApplications.length === 0 && (applications || []).length === 0 ? (
                 <div className="text-center py-16">
                     <Cube size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <h3 className="text-lg font-medium text-foreground mb-2">No applications yet</h3>
-                    <p className="text-muted-foreground mb-6">Start building your application portfolio by adding your first application.</p>
+                    <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma aplicação ainda</h3>
+                    <p className="text-muted-foreground mb-6">Comece construindo seu portfólio de aplicações adicionando sua primeira aplicação.</p>
                     <Button onClick={() => setShowForm(true)} className="gap-2">
                         <Plus size={16} />
-                        Add Your First Application
+                        Adicionar Sua Primeira Aplicação
                     </Button>
                 </div>
             ) : filteredApplications.length === 0 ? (
                 <div className="text-center py-16">
                     <FunnelSimple size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
-                    <h3 className="text-lg font-medium text-foreground mb-2">No matching applications</h3>
-                    <p className="text-muted-foreground">Try adjusting your search criteria.</p>
+                    <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma aplicação encontrada</h3>
+                    <p className="text-muted-foreground">Tente ajustar seus critérios de busca.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -153,7 +153,7 @@ export function ApplicationsView() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium">Criticality</span>
+                                    <span className="text-sm font-medium">Criticidade</span>
                                     <Badge className={getCriticalityColor(app.criticality)}>
                                         {app.criticality}
                                     </Badge>
@@ -161,7 +161,7 @@ export function ApplicationsView() {
                                 
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium">Health Score</span>
+                                        <span className="text-sm font-medium">Pontuação de Saúde</span>
                                         <span className="text-sm text-muted-foreground">{app.healthScore}%</span>
                                     </div>
                                     <Progress value={app.healthScore} />
@@ -169,14 +169,14 @@ export function ApplicationsView() {
 
                                 {app.hostingType && (
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm text-muted-foreground">Hosting</span>
+                                        <span className="text-sm text-muted-foreground">Hospedagem</span>
                                         <span className="text-sm">{app.hostingType}</span>
                                     </div>
                                 )}
 
                                 {app.estimatedCost && (
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm text-muted-foreground">Est. Cost</span>
+                                        <span className="text-sm text-muted-foreground">Custo Est.</span>
                                         <span className="text-sm font-medium">
                                             {new Intl.NumberFormat('pt-BR', {
                                                 style: 'currency',
