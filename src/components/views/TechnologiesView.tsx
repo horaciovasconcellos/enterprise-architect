@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Plus, Gear, FunnelSimple } from '@phosphor-icons/react'
+import { Plus, Gear, FunnelSimple, PencilSimple, Trash } from '@phosphor-icons/react'
+import { TechnologyForm } from '../forms/TechnologyForm'
 
 interface Technology {
     id: string
@@ -13,25 +14,59 @@ interface Technology {
     category: string
     healthScore: number
     version?: string
+    vendor?: string
+    licenseType?: string
+    supportLevel?: string
+    deploymentType?: string
 }
 
 export function TechnologiesView() {
     const [technologies, setTechnologies] = useKV<Technology[]>('technologies', [])
     const [showForm, setShowForm] = useState(false)
+    const [editingTechnology, setEditingTechnology] = useState<Technology | undefined>()
     const [filter, setFilter] = useState<string>('')
 
     const handleAddTechnology = () => {
-        const name = prompt('Nome da Tecnologia:')
-        if (name) {
+        setEditingTechnology(undefined)
+        setShowForm(true)
+    }
+
+    const handleEditTechnology = (technology: Technology) => {
+        setEditingTechnology(technology)
+        setShowForm(true)
+    }
+
+    const handleDeleteTechnology = (id: string) => {
+        if (confirm('Tem certeza que deseja excluir esta tecnologia?')) {
+            setTechnologies((current) => (current || []).filter(tech => tech.id !== id))
+        }
+    }
+
+    const handleSubmitTechnology = (technologyData: Omit<Technology, 'id'>) => {
+        if (editingTechnology) {
+            // Update existing technology
+            setTechnologies((current) => 
+                (current || []).map(tech => 
+                    tech.id === editingTechnology.id 
+                        ? { ...technologyData, id: editingTechnology.id }
+                        : tech
+                )
+            )
+        } else {
+            // Create new technology
             const newTechnology: Technology = {
-                id: Date.now().toString(),
-                name,
-                category: 'INFRAESTRUTURA',
-                healthScore: Math.floor(Math.random() * 100),
-                version: '1.0.0'
+                ...technologyData,
+                id: Date.now().toString()
             }
             setTechnologies((current) => [...(current || []), newTechnology])
         }
+        setShowForm(false)
+        setEditingTechnology(undefined)
+    }
+
+    const handleCancelForm = () => {
+        setShowForm(false)
+        setEditingTechnology(undefined)
     }
 
     const filteredTechnologies = (technologies || []).filter(tech =>
@@ -102,18 +137,42 @@ export function TechnologiesView() {
                         <Card key={technology.id} className="hover:shadow-md transition-shadow">
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between">
-                                    <div>
+                                    <div className="flex-1">
                                         <CardTitle className="text-lg">{technology.name}</CardTitle>
-                                        {technology.version && (
-                                            <p className="text-sm text-muted-foreground">v{technology.version}</p>
-                                        )}
+                                        <div className="flex items-center gap-2 mt-1">
+                                            {technology.version && (
+                                                <span className="text-sm text-muted-foreground">v{technology.version}</span>
+                                            )}
+                                            {technology.vendor && (
+                                                <span className="text-sm text-muted-foreground">• {technology.vendor}</span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <Badge className={getCategoryColor(technology.category)}>
-                                        {technology.category}
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Badge className={getCategoryColor(technology.category)}>
+                                            {technology.category}
+                                        </Badge>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleEditTechnology(technology)}
+                                            >
+                                                <PencilSimple size={14} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDeleteTechnology(technology.id)}
+                                                className="text-destructive hover:text-destructive"
+                                            >
+                                                <Trash size={14} />
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </div>
                                 {technology.description && (
-                                    <p className="text-sm text-muted-foreground line-clamp-2">
+                                    <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
                                         {technology.description}
                                     </p>
                                 )}
@@ -127,14 +186,42 @@ export function TechnologiesView() {
                                     <Progress value={technology.healthScore} />
                                 </div>
                                 
-                                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                                    <span>Aplicações</span>
-                                    <span>{Math.floor(Math.random() * 8) + 1} usando</span>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    {technology.licenseType && (
+                                        <div>
+                                            <span className="font-medium text-muted-foreground">Licença:</span>
+                                            <p className="text-foreground">{technology.licenseType}</p>
+                                        </div>
+                                    )}
+                                    {technology.supportLevel && (
+                                        <div>
+                                            <span className="font-medium text-muted-foreground">Suporte:</span>
+                                            <p className="text-foreground">{technology.supportLevel}</p>
+                                        </div>
+                                    )}
+                                    {technology.deploymentType && (
+                                        <div>
+                                            <span className="font-medium text-muted-foreground">Deploy:</span>
+                                            <p className="text-foreground">{technology.deploymentType}</p>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <span className="font-medium text-muted-foreground">Aplicações:</span>
+                                        <p className="text-foreground">{Math.floor(Math.random() * 8) + 1} usando</p>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
+            )}
+
+            {showForm && (
+                <TechnologyForm
+                    technology={editingTechnology}
+                    onSubmit={handleSubmitTechnology}
+                    onCancel={handleCancelForm}
+                />
             )}
         </div>
     )

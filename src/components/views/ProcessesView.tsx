@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Plus, FlowArrow, FunnelSimple } from '@phosphor-icons/react'
+import { Plus, FlowArrow, FunnelSimple, PencilSimple, Trash } from '@phosphor-icons/react'
+import { ProcessForm } from '../forms/ProcessForm'
 
 interface Process {
     id: string
@@ -14,24 +15,59 @@ interface Process {
     automationScore: number
     categoryId?: string
     supportingApps: number
+    owner?: string
+    frequency?: string
+    duration?: string
+    complexity?: string
 }
 
 export function ProcessesView() {
     const [processes, setProcesses] = useKV<Process[]>('processes', [])
+    const [showForm, setShowForm] = useState(false)
+    const [editingProcess, setEditingProcess] = useState<Process | undefined>()
     const [filter, setFilter] = useState<string>('')
 
     const handleAddProcess = () => {
-        const name = prompt('Nome do Processo:')
-        if (name) {
+        setEditingProcess(undefined)
+        setShowForm(true)
+    }
+
+    const handleEditProcess = (process: Process) => {
+        setEditingProcess(process)
+        setShowForm(true)
+    }
+
+    const handleDeleteProcess = (id: string) => {
+        if (confirm('Tem certeza que deseja excluir este processo?')) {
+            setProcesses((current) => (current || []).filter(proc => proc.id !== id))
+        }
+    }
+
+    const handleSubmitProcess = (processData: Omit<Process, 'id'>) => {
+        if (editingProcess) {
+            // Update existing process
+            setProcesses((current) => 
+                (current || []).map(proc => 
+                    proc.id === editingProcess.id 
+                        ? { ...processData, id: editingProcess.id }
+                        : proc
+                )
+            )
+        } else {
+            // Create new process
             const newProcess: Process = {
-                id: Date.now().toString(),
-                name,
-                maturityLevel: 'DEFINIDO',
-                automationScore: Math.floor(Math.random() * 100),
-                supportingApps: Math.floor(Math.random() * 3) + 1
+                ...processData,
+                id: Date.now().toString()
             }
             setProcesses((current) => [...(current || []), newProcess])
         }
+        setShowForm(false)
+        setEditingProcess(undefined)
+    }
+
+    const handleCancelForm = () => {
+        setShowForm(false)
+        setEditingProcess(undefined)
     }
 
     const filteredProcesses = (processes || []).filter(proc =>
@@ -100,13 +136,45 @@ export function ProcessesView() {
                         <Card key={process.id} className="hover:shadow-md transition-shadow">
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between">
-                                    <CardTitle className="text-lg">{process.name}</CardTitle>
-                                    <Badge className={getMaturityColor(process.maturityLevel)}>
-                                        {process.maturityLevel}
-                                    </Badge>
+                                    <div className="flex-1">
+                                        <CardTitle className="text-lg">{process.name}</CardTitle>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            {process.owner && (
+                                                <span className="text-sm text-muted-foreground">{process.owner}</span>
+                                            )}
+                                            {process.frequency && process.owner && (
+                                                <span className="text-sm text-muted-foreground">•</span>
+                                            )}
+                                            {process.frequency && (
+                                                <span className="text-sm text-muted-foreground">{process.frequency}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Badge className={getMaturityColor(process.maturityLevel)}>
+                                            {process.maturityLevel}
+                                        </Badge>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleEditProcess(process)}
+                                            >
+                                                <PencilSimple size={14} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDeleteProcess(process.id)}
+                                                className="text-destructive hover:text-destructive"
+                                            >
+                                                <Trash size={14} />
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </div>
                                 {process.description && (
-                                    <p className="text-sm text-muted-foreground line-clamp-2">
+                                    <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
                                         {process.description}
                                     </p>
                                 )}
@@ -120,14 +188,42 @@ export function ProcessesView() {
                                     <Progress value={process.automationScore} />
                                 </div>
                                 
-                                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                                    <span>Aplicações</span>
-                                    <span>{process.supportingApps} suportando</span>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span className="font-medium text-muted-foreground">Aplicações:</span>
+                                        <p className="text-foreground">{process.supportingApps} suportando</p>
+                                    </div>
+                                    {process.duration && (
+                                        <div>
+                                            <span className="font-medium text-muted-foreground">Duração:</span>
+                                            <p className="text-foreground">{process.duration}</p>
+                                        </div>
+                                    )}
+                                    {process.complexity && (
+                                        <div>
+                                            <span className="font-medium text-muted-foreground">Complexidade:</span>
+                                            <p className="text-foreground">{process.complexity}</p>
+                                        </div>
+                                    )}
+                                    {process.categoryId && (
+                                        <div>
+                                            <span className="font-medium text-muted-foreground">Área:</span>
+                                            <p className="text-foreground">{process.categoryId}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
+            )}
+
+            {showForm && (
+                <ProcessForm
+                    process={editingProcess}
+                    onSubmit={handleSubmitProcess}
+                    onCancel={handleCancelForm}
+                />
             )}
         </div>
     )

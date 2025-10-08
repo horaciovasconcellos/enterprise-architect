@@ -1,442 +1,308 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
-import { ArrowLeft, FloppyDisk } from '@phosphor-icons/react'
-import { TagInput, TAG_SUGGESTIONS } from './components/TagInput'
+import { X } from '@phosphor-icons/react'
 
 interface Process {
     id: string
     name: string
     description?: string
-    type: string
-    category: string
-    owner?: string
     maturityLevel: string
-    automationLevel: string
-    frequency: string
-    criticality: string
-    riskLevel: string
-    compliance: string[]
-    performanceMetrics: {
-        cycleTime?: number
-        cost?: number
-        quality?: number
-        satisfaction?: number
-    }
-    inputs: string[]
-    outputs: string[]
-    enabledBy: string[]
-    supports: string[]
-    tags: string[]
+    automationScore: number
+    categoryId?: string
+    supportingApps: number
+    owner?: string
+    frequency?: string
+    duration?: string
+    complexity?: string
 }
 
 interface ProcessFormProps {
-    process?: Process | null
-    onSave: (data: Omit<Process, 'id'>) => void
+    onSubmit: (process: Omit<Process, 'id'>) => void
     onCancel: () => void
+    process?: Process
 }
 
-export function ProcessForm({ process, onSave, onCancel }: ProcessFormProps) {
+const maturityLevels = [
+    'INICIAL',
+    'REPETÍVEL', 
+    'DEFINIDO',
+    'GERENCIADO',
+    'OTIMIZADO'
+]
+
+const frequencies = [
+    'Contínuo',
+    'Diário',
+    'Semanal',
+    'Mensal',
+    'Trimestral',
+    'Anual',
+    'Ad-hoc'
+]
+
+const complexityLevels = [
+    'Baixa',
+    'Média',
+    'Alta',
+    'Muito Alta'
+]
+
+export function ProcessForm({ onSubmit, onCancel, process }: ProcessFormProps) {
     const [formData, setFormData] = useState({
         name: process?.name || '',
         description: process?.description || '',
-        type: process?.type || 'CORE',
-        category: process?.category || '',
+        maturityLevel: process?.maturityLevel || '',
+        automationScore: process?.automationScore || 50,
+        categoryId: process?.categoryId || '',
+        supportingApps: process?.supportingApps || 0,
         owner: process?.owner || '',
-        maturityLevel: process?.maturityLevel || 'DEFINED',
-        automationLevel: process?.automationLevel || 'MANUAL',
-        frequency: process?.frequency || 'DAILY',
-        criticality: process?.criticality || 'MEDIUM',
-        riskLevel: process?.riskLevel || 'MEDIUM',
-        compliance: process?.compliance || [],
-        performanceMetrics: {
-            cycleTime: process?.performanceMetrics?.cycleTime || 0,
-            cost: process?.performanceMetrics?.cost || 0,
-            quality: process?.performanceMetrics?.quality || 85,
-            satisfaction: process?.performanceMetrics?.satisfaction || 85
-        },
-        inputs: process?.inputs || [],
-        outputs: process?.outputs || [],
-        enabledBy: process?.enabledBy || [],
-        supports: process?.supports || [],
-        tags: process?.tags || []
+        frequency: process?.frequency || '',
+        duration: process?.duration || '',
+        complexity: process?.complexity || ''
     })
+
+    const [errors, setErrors] = useState<Record<string, string>>({})
+
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {}
+
+        if (!formData.name.trim()) {
+            newErrors.name = 'Nome é obrigatório'
+        }
+
+        if (!formData.maturityLevel) {
+            newErrors.maturityLevel = 'Nível de maturidade é obrigatório'
+        }
+
+        if (formData.automationScore < 0 || formData.automationScore > 100) {
+            newErrors.automationScore = 'Pontuação deve estar entre 0 e 100'
+        }
+
+        if (formData.supportingApps < 0) {
+            newErrors.supportingApps = 'Número de aplicações deve ser positivo'
+        }
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        onSave(formData)
+        
+        if (validateForm()) {
+            onSubmit({
+                name: formData.name.trim(),
+                description: formData.description.trim() || undefined,
+                maturityLevel: formData.maturityLevel,
+                automationScore: formData.automationScore,
+                categoryId: formData.categoryId.trim() || undefined,
+                supportingApps: formData.supportingApps,
+                owner: formData.owner.trim() || undefined,
+                frequency: formData.frequency || undefined,
+                duration: formData.duration.trim() || undefined,
+                complexity: formData.complexity || undefined
+            })
+        }
     }
 
-    const updateField = (field: string, value: any) => {
+    const handleInputChange = (field: string, value: string | number) => {
         setFormData(prev => ({ ...prev, [field]: value }))
-    }
-
-    const updateMetric = (metric: string, value: number) => {
-        setFormData(prev => ({
-            ...prev,
-            performanceMetrics: {
-                ...prev.performanceMetrics,
-                [metric]: value
-            }
-        }))
+        // Clear error when user starts typing
+        if (errors[field]) {
+            setErrors(prev => ({ ...prev, [field]: '' }))
+        }
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" onClick={onCancel}>
-                    <ArrowLeft size={16} />
-                </Button>
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground">
-                        {process ? 'Edit Process' : 'New Process'}
-                    </h1>
-                    <p className="text-muted-foreground">
-                        {process ? 'Update process definition and metrics' : 'Define a new business process'}
-                    </p>
-                </div>
-            </div>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                    <CardTitle>
+                        {process ? 'Editar Processo' : 'Novo Processo'}
+                    </CardTitle>
+                    <Button variant="ghost" size="sm" onClick={onCancel}>
+                        <X size={16} />
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Nome do Processo *</Label>
+                            <Input
+                                id="name"
+                                value={formData.name}
+                                onChange={(e) => handleInputChange('name', e.target.value)}
+                                placeholder="Ex: Processamento de Pedidos, Onboarding de Funcionários"
+                                className={errors.name ? 'border-destructive' : ''}
+                            />
+                            {errors.name && (
+                                <p className="text-sm text-destructive">{errors.name}</p>
+                            )}
+                        </div>
 
-            <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Basic Information</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div>
-                                    <Label htmlFor="name">Process Name</Label>
-                                    <Input
-                                        id="name"
-                                        value={formData.name}
-                                        onChange={(e) => updateField('name', e.target.value)}
-                                        placeholder="e.g. Customer Onboarding"
-                                        required
-                                    />
+                        <div className="space-y-2">
+                            <Label htmlFor="description">Descrição</Label>
+                            <Textarea
+                                id="description"
+                                value={formData.description}
+                                onChange={(e) => handleInputChange('description', e.target.value)}
+                                placeholder="Descreva o objetivo e etapas principais do processo..."
+                                className="min-h-[100px]"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="maturityLevel">Nível de Maturidade *</Label>
+                                <Select 
+                                    value={formData.maturityLevel} 
+                                    onValueChange={(value) => handleInputChange('maturityLevel', value)}
+                                >
+                                    <SelectTrigger className={errors.maturityLevel ? 'border-destructive' : ''}>
+                                        <SelectValue placeholder="Selecione o nível" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {maturityLevels.map((level) => (
+                                            <SelectItem key={level} value={level}>
+                                                {level}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.maturityLevel && (
+                                    <p className="text-sm text-destructive">{errors.maturityLevel}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="owner">Responsável</Label>
+                                <Input
+                                    id="owner"
+                                    value={formData.owner}
+                                    onChange={(e) => handleInputChange('owner', e.target.value)}
+                                    placeholder="Ex: Departamento de Vendas, João Silva"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="frequency">Frequência</Label>
+                                <Select 
+                                    value={formData.frequency} 
+                                    onValueChange={(value) => handleInputChange('frequency', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione a frequência" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {frequencies.map((freq) => (
+                                            <SelectItem key={freq} value={freq}>
+                                                {freq}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="duration">Duração Média</Label>
+                                <Input
+                                    id="duration"
+                                    value={formData.duration}
+                                    onChange={(e) => handleInputChange('duration', e.target.value)}
+                                    placeholder="Ex: 2 horas, 3 dias"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="complexity">Complexidade</Label>
+                                <Select 
+                                    value={formData.complexity} 
+                                    onValueChange={(value) => handleInputChange('complexity', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione a complexidade" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {complexityLevels.map((level) => (
+                                            <SelectItem key={level} value={level}>
+                                                {level}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-3">
+                                <Label>Pontuação de Automação: {formData.automationScore}%</Label>
+                                <Slider
+                                    value={[formData.automationScore]}
+                                    onValueChange={(value) => handleInputChange('automationScore', value[0])}
+                                    max={100}
+                                    min={0}
+                                    step={5}
+                                    className="w-full"
+                                />
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                    <span>Manual (0%)</span>
+                                    <span>Parcial (50%)</span>
+                                    <span>Automático (100%)</span>
                                 </div>
-                                
-                                <div>
-                                    <Label htmlFor="description">Description</Label>
-                                    <Textarea
-                                        id="description"
-                                        value={formData.description}
-                                        onChange={(e) => updateField('description', e.target.value)}
-                                        placeholder="Describe the purpose and key activities of this process..."
-                                        rows={3}
-                                    />
-                                </div>
+                                {errors.automationScore && (
+                                    <p className="text-sm text-destructive">{errors.automationScore}</p>
+                                )}
+                            </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="type">Process Type</Label>
-                                        <Select value={formData.type} onValueChange={(value) => updateField('type', value)}>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="CORE">Core Process</SelectItem>
-                                                <SelectItem value="SUPPORT">Support Process</SelectItem>
-                                                <SelectItem value="MANAGEMENT">Management Process</SelectItem>
-                                                <SelectItem value="GOVERNANCE">Governance Process</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="supportingApps">Aplicações de Suporte</Label>
+                                <Input
+                                    id="supportingApps"
+                                    type="number"
+                                    min="0"
+                                    value={formData.supportingApps}
+                                    onChange={(e) => handleInputChange('supportingApps', parseInt(e.target.value) || 0)}
+                                    placeholder="0"
+                                    className={errors.supportingApps ? 'border-destructive' : ''}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Número de aplicações que suportam este processo
+                                </p>
+                                {errors.supportingApps && (
+                                    <p className="text-sm text-destructive">{errors.supportingApps}</p>
+                                )}
+                            </div>
+                        </div>
 
-                                    <div>
-                                        <Label htmlFor="category">Category</Label>
-                                        <Input
-                                            id="category"
-                                            value={formData.category}
-                                            onChange={(e) => updateField('category', e.target.value)}
-                                            placeholder="e.g. Sales, Finance, HR"
-                                        />
-                                    </div>
-                                </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="categoryId">Categoria/Área</Label>
+                            <Input
+                                id="categoryId"
+                                value={formData.categoryId}
+                                onChange={(e) => handleInputChange('categoryId', e.target.value)}
+                                placeholder="Ex: Vendas, RH, Financeiro, Operações"
+                            />
+                        </div>
 
-                                <div>
-                                    <Label htmlFor="owner">Process Owner</Label>
-                                    <Input
-                                        id="owner"
-                                        value={formData.owner}
-                                        onChange={(e) => updateField('owner', e.target.value)}
-                                        placeholder="e.g. Sales Director"
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Process Characteristics</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="maturity">Maturity Level</Label>
-                                        <Select value={formData.maturityLevel} onValueChange={(value) => updateField('maturityLevel', value)}>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="INITIAL">Initial (Ad-hoc)</SelectItem>
-                                                <SelectItem value="DEFINED">Defined</SelectItem>
-                                                <SelectItem value="STANDARDIZED">Standardized</SelectItem>
-                                                <SelectItem value="MANAGED">Managed</SelectItem>
-                                                <SelectItem value="OPTIMIZED">Optimized</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="automation">Automation Level</Label>
-                                        <Select value={formData.automationLevel} onValueChange={(value) => updateField('automationLevel', value)}>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="MANUAL">Manual</SelectItem>
-                                                <SelectItem value="SEMI_AUTOMATED">Semi-Automated</SelectItem>
-                                                <SelectItem value="AUTOMATED">Automated</SelectItem>
-                                                <SelectItem value="INTELLIGENT">Intelligent/AI</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <Label htmlFor="frequency">Execution Frequency</Label>
-                                        <Select value={formData.frequency} onValueChange={(value) => updateField('frequency', value)}>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="REAL_TIME">Real-time</SelectItem>
-                                                <SelectItem value="HOURLY">Hourly</SelectItem>
-                                                <SelectItem value="DAILY">Daily</SelectItem>
-                                                <SelectItem value="WEEKLY">Weekly</SelectItem>
-                                                <SelectItem value="MONTHLY">Monthly</SelectItem>
-                                                <SelectItem value="QUARTERLY">Quarterly</SelectItem>
-                                                <SelectItem value="ANNUALLY">Annually</SelectItem>
-                                                <SelectItem value="ON_DEMAND">On-Demand</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="criticality">Business Criticality</Label>
-                                        <Select value={formData.criticality} onValueChange={(value) => updateField('criticality', value)}>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="LOW">Low</SelectItem>
-                                                <SelectItem value="MEDIUM">Medium</SelectItem>
-                                                <SelectItem value="HIGH">High</SelectItem>
-                                                <SelectItem value="CRITICAL">Critical</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="risk">Risk Level</Label>
-                                        <Select value={formData.riskLevel} onValueChange={(value) => updateField('riskLevel', value)}>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="LOW">Low</SelectItem>
-                                                <SelectItem value="MEDIUM">Medium</SelectItem>
-                                                <SelectItem value="HIGH">High</SelectItem>
-                                                <SelectItem value="CRITICAL">Critical</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Performance Metrics</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <Label htmlFor="cycleTime">Cycle Time (hours)</Label>
-                                        <Input
-                                            id="cycleTime"
-                                            type="number"
-                                            min="0"
-                                            step="0.1"
-                                            value={formData.performanceMetrics.cycleTime || ''}
-                                            onChange={(e) => updateMetric('cycleTime', Number(e.target.value))}
-                                            placeholder="24"
-                                        />
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            Average time from start to completion
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="cost">Process Cost (per execution)</Label>
-                                        <Input
-                                            id="cost"
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={formData.performanceMetrics.cost || ''}
-                                            onChange={(e) => updateMetric('cost', Number(e.target.value))}
-                                            placeholder="150.00"
-                                        />
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            Average cost per process execution
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <Label>Quality Score: {formData.performanceMetrics.quality}%</Label>
-                                        <Slider
-                                            value={[formData.performanceMetrics.quality || 85]}
-                                            onValueChange={(value) => updateMetric('quality', value[0])}
-                                            max={100}
-                                            step={1}
-                                            className="mt-2"
-                                        />
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            Process quality and accuracy
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <Label>Customer Satisfaction: {formData.performanceMetrics.satisfaction}%</Label>
-                                        <Slider
-                                            value={[formData.performanceMetrics.satisfaction || 85]}
-                                            onValueChange={(value) => updateMetric('satisfaction', value[0])}
-                                            max={100}
-                                            step={1}
-                                            className="mt-2"
-                                        />
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            User/customer satisfaction score
-                                        </p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Process Flow & Relationships</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div>
-                                    <Label>Process Inputs</Label>
-                                    <TagInput
-                                        tags={formData.inputs}
-                                        onChange={(inputs) => updateField('inputs', inputs)}
-                                        placeholder="Add process inputs (e.g. customer-data, application-form)"
-                                        suggestions={TAG_SUGGESTIONS.process}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label>Process Outputs</Label>
-                                    <TagInput
-                                        tags={formData.outputs}
-                                        onChange={(outputs) => updateField('outputs', outputs)}
-                                        placeholder="Add process outputs (e.g. approval-decision, account-created)"
-                                        suggestions={TAG_SUGGESTIONS.process}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label>Enabled By (Technologies/Applications)</Label>
-                                    <TagInput
-                                        tags={formData.enabledBy}
-                                        onChange={(enabledBy) => updateField('enabledBy', enabledBy)}
-                                        placeholder="Add enabling technologies or applications"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label>Supports (Business Capabilities)</Label>
-                                    <TagInput
-                                        tags={formData.supports}
-                                        onChange={(supports) => updateField('supports', supports)}
-                                        placeholder="Add business capabilities this process supports"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label>Compliance Requirements</Label>
-                                    <TagInput
-                                        tags={formData.compliance}
-                                        onChange={(compliance) => updateField('compliance', compliance)}
-                                        placeholder="Add compliance frameworks (e.g. GDPR, SOX, LGPD)"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label>Tags</Label>
-                                    <TagInput
-                                        tags={formData.tags}
-                                        onChange={(tags) => updateField('tags', tags)}
-                                        placeholder="Add descriptive tags"
-                                        suggestions={TAG_SUGGESTIONS.process}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    <div className="space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Quick Reference</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4 text-sm">
-                                <div>
-                                    <h4 className="font-medium mb-2">Process Types</h4>
-                                    <ul className="space-y-1 text-muted-foreground">
-                                        <li><strong>Core:</strong> Value-creating processes</li>
-                                        <li><strong>Support:</strong> Enable core processes</li>
-                                        <li><strong>Management:</strong> Planning & control</li>
-                                        <li><strong>Governance:</strong> Risk & compliance</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-medium mb-2">Automation Levels</h4>
-                                    <ul className="space-y-1 text-muted-foreground">
-                                        <li><strong>Manual:</strong> Human-performed</li>
-                                        <li><strong>Semi:</strong> Partial automation</li>
-                                        <li><strong>Automated:</strong> Fully automated</li>
-                                        <li><strong>Intelligent:</strong> AI-driven</li>
-                                    </ul>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <div className="flex flex-col gap-2">
-                            <Button type="submit" className="gap-2">
-                                <FloppyDisk size={16} />
-                                {process ? 'Update Process' : 'Create Process'}
-                            </Button>
+                        <div className="flex justify-end gap-3 pt-4">
                             <Button type="button" variant="outline" onClick={onCancel}>
-                                Cancel
+                                Cancelar
+                            </Button>
+                            <Button type="submit">
+                                {process ? 'Atualizar Processo' : 'Criar Processo'}
                             </Button>
                         </div>
-                    </div>
-                </div>
-            </form>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
     )
 }
