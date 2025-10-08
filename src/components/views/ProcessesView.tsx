@@ -7,6 +7,18 @@ import { Progress } from '@/components/ui/progress'
 import { Plus, FlowArrow, FunnelSimple, PencilSimple, Trash } from '@phosphor-icons/react'
 import { ProcessForm } from '../forms/ProcessForm'
 
+interface Norm {
+    id: string
+    norma: string
+    itemNorma: string
+}
+
+interface Application {
+    id: string
+    name: string
+    relatedProcesses?: string[]
+}
+
 interface Process {
     id: string
     name: string
@@ -19,15 +31,22 @@ interface Process {
     frequency?: string
     duration?: string
     complexity?: string
-    norma?: string
-    itemNorma?: string
+    norms?: Norm[]
 }
 
 export function ProcessesView() {
     const [processes, setProcesses] = useKV<Process[]>('processes', [])
+    const [applications] = useKV<Application[]>('applications', [])
     const [showForm, setShowForm] = useState(false)
     const [editingProcess, setEditingProcess] = useState<Process | undefined>()
     const [filter, setFilter] = useState<string>('')
+
+    // Helper function to get applications that support a specific process
+    const getProcessApplications = (processId: string) => {
+        return (applications || []).filter(app => 
+            app.relatedProcesses?.includes(processId)
+        )
+    }
 
     const handleAddProcess = () => {
         setEditingProcess(undefined)
@@ -193,7 +212,21 @@ export function ProcessesView() {
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <span className="font-medium text-muted-foreground">Aplicações:</span>
-                                        <p className="text-foreground">{process.supportingApps} suportando</p>
+                                        <p className="text-foreground">{getProcessApplications(process.id).length} suportando</p>
+                                        {getProcessApplications(process.id).length > 0 && (
+                                            <div className="mt-1 flex flex-wrap gap-1">
+                                                {getProcessApplications(process.id).slice(0, 3).map(app => (
+                                                    <Badge key={app.id} variant="outline" className="text-xs">
+                                                        {app.name}
+                                                    </Badge>
+                                                ))}
+                                                {getProcessApplications(process.id).length > 3 && (
+                                                    <Badge variant="outline" className="text-xs">
+                                                        +{getProcessApplications(process.id).length - 3} mais
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                     {process.duration && (
                                         <div>
@@ -213,19 +246,25 @@ export function ProcessesView() {
                                             <p className="text-foreground">{process.categoryId}</p>
                                         </div>
                                     )}
-                                    {process.norma && (
-                                        <div>
-                                            <span className="font-medium text-muted-foreground">Norma:</span>
-                                            <p className="text-foreground">{process.norma}</p>
-                                        </div>
-                                    )}
-                                    {process.itemNorma && (
-                                        <div>
-                                            <span className="font-medium text-muted-foreground">Item da Norma:</span>
-                                            <p className="text-foreground">{process.itemNorma}</p>
-                                        </div>
-                                    )}
                                 </div>
+                                
+                                {process.norms && process.norms.length > 0 && (
+                                    <div className="mt-4">
+                                        <span className="text-sm font-medium text-muted-foreground">Normas:</span>
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                            {process.norms.slice(0, 2).map(norm => (
+                                                <Badge key={norm.id} variant="outline" className="text-xs">
+                                                    {norm.norma} - {norm.itemNorma}
+                                                </Badge>
+                                            ))}
+                                            {process.norms.length > 2 && (
+                                                <Badge variant="outline" className="text-xs">
+                                                    +{process.norms.length - 2} normas
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     ))}

@@ -6,7 +6,14 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { X } from '@phosphor-icons/react'
+import { Badge } from '@/components/ui/badge'
+import { X, Plus } from '@phosphor-icons/react'
+
+interface Norm {
+    id: string
+    norma: string
+    itemNorma: string
+}
 
 interface Process {
     id: string
@@ -20,8 +27,7 @@ interface Process {
     frequency?: string
     duration?: string
     complexity?: string
-    norma?: string
-    itemNorma?: string
+    norms?: Norm[]
 }
 
 interface ProcessFormProps {
@@ -67,11 +73,33 @@ export function ProcessForm({ onSubmit, onCancel, process }: ProcessFormProps) {
         frequency: process?.frequency || '',
         duration: process?.duration || '',
         complexity: process?.complexity || '',
-        norma: process?.norma || '',
-        itemNorma: process?.itemNorma || ''
+        norms: process?.norms || []
     })
 
+    const [newNorm, setNewNorm] = useState({ norma: '', itemNorma: '' })
     const [errors, setErrors] = useState<Record<string, string>>({})
+
+    const addNorm = () => {
+        if (newNorm.norma.trim() && newNorm.itemNorma.trim()) {
+            const norm: Norm = {
+                id: Date.now().toString(),
+                norma: newNorm.norma.trim(),
+                itemNorma: newNorm.itemNorma.trim()
+            }
+            setFormData(prev => ({
+                ...prev,
+                norms: [...prev.norms, norm]
+            }))
+            setNewNorm({ norma: '', itemNorma: '' })
+        }
+    }
+
+    const removeNorm = (normId: string) => {
+        setFormData(prev => ({
+            ...prev,
+            norms: prev.norms.filter(norm => norm.id !== normId)
+        }))
+    }
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {}
@@ -111,8 +139,7 @@ export function ProcessForm({ onSubmit, onCancel, process }: ProcessFormProps) {
                 frequency: formData.frequency || undefined,
                 duration: formData.duration.trim() || undefined,
                 complexity: formData.complexity || undefined,
-                norma: formData.norma.trim() || undefined,
-                itemNorma: formData.itemNorma.trim() || undefined
+                norms: formData.norms.length > 0 ? formData.norms : undefined
             })
         }
     }
@@ -298,26 +325,63 @@ export function ProcessForm({ onSubmit, onCancel, process }: ProcessFormProps) {
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="norma">Norma</Label>
-                                <Input
-                                    id="norma"
-                                    value={formData.norma}
-                                    onChange={(e) => handleInputChange('norma', e.target.value)}
-                                    placeholder="Ex: ISO 9001, LGPD, SOX"
-                                />
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Label>Normas e Regulamentações</Label>
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={addNorm}
+                                    disabled={!newNorm.norma.trim() || !newNorm.itemNorma.trim()}
+                                    className="gap-2"
+                                >
+                                    <Plus size={14} />
+                                    Adicionar Norma
+                                </Button>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="newNorma">Norma</Label>
+                                    <Input
+                                        id="newNorma"
+                                        value={newNorm.norma}
+                                        onChange={(e) => setNewNorm(prev => ({ ...prev, norma: e.target.value }))}
+                                        placeholder="Ex: ISO 9001, LGPD, SOX"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="newItemNorma">Item da Norma</Label>
+                                    <Input
+                                        id="newItemNorma"
+                                        value={newNorm.itemNorma}
+                                        onChange={(e) => setNewNorm(prev => ({ ...prev, itemNorma: e.target.value }))}
+                                        placeholder="Ex: 4.1, 7.2.1, Artigo 5º"
+                                    />
+                                </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="itemNorma">Item da Norma</Label>
-                                <Input
-                                    id="itemNorma"
-                                    value={formData.itemNorma}
-                                    onChange={(e) => handleInputChange('itemNorma', e.target.value)}
-                                    placeholder="Ex: 4.1, 7.2.1, Artigo 5º"
-                                />
-                            </div>
+                            {formData.norms.length > 0 && (
+                                <div className="space-y-2">
+                                    <Label>Normas Associadas</Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {formData.norms.map((norm) => (
+                                            <Badge key={norm.id} variant="secondary" className="gap-2 pr-2">
+                                                <span className="font-medium">{norm.norma}</span>
+                                                <span className="text-muted-foreground">-</span>
+                                                <span>{norm.itemNorma}</span>
+                                                <X 
+                                                    size={12} 
+                                                    className="cursor-pointer hover:text-destructive"
+                                                    onClick={() => removeNorm(norm.id)}
+                                                />
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4">

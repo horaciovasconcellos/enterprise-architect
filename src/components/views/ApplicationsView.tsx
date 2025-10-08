@@ -19,6 +19,10 @@ interface Application {
     functionalFit?: string
     estimatedCost?: number
     currency?: string
+    relatedCapabilities?: string[]
+    relatedProcesses?: string[]
+    relatedTechnologies?: string[]
+    relatedApplications?: string[]
 }
 
 export function ApplicationsView() {
@@ -57,20 +61,45 @@ export function ApplicationsView() {
 
     const getLifecycleBadgeColor = (phase: string) => {
         switch (phase) {
-            case 'PRODUCTION': return 'bg-green-500/10 text-green-700 border-green-500/20'
-            case 'MAINTENANCE': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
-            case 'SUNSET': return 'bg-red-500/10 text-red-700 border-red-500/20'
-            case 'DEVELOPMENT': return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
+            case 'PRODUCAO': return 'bg-green-500/10 text-green-700 border-green-500/20'
+            case 'MANUTENCAO': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
+            case 'DESATIVACAO': return 'bg-red-500/10 text-red-700 border-red-500/20'
+            case 'DESENVOLVIMENTO': return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
+            case 'PLANEJAMENTO': return 'bg-purple-500/10 text-purple-700 border-purple-500/20'
+            case 'APOSENTADO': return 'bg-gray-500/10 text-gray-700 border-gray-500/20'
             default: return 'bg-gray-500/10 text-gray-700 border-gray-500/20'
         }
     }
 
     const getCriticalityColor = (criticality: string) => {
         switch (criticality) {
-            case 'CRITICAL': return 'bg-red-500/10 text-red-700 border-red-500/20'
-            case 'HIGH': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
-            case 'MEDIUM': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
+            case 'CRITICA': return 'bg-red-500/10 text-red-700 border-red-500/20'
+            case 'ALTA': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
+            case 'MEDIA': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
+            case 'BAIXA': return 'bg-green-500/10 text-green-700 border-green-500/20'
             default: return 'bg-green-500/10 text-green-700 border-green-500/20'
+        }
+    }
+
+    const getLifecycleDisplayName = (phase: string) => {
+        switch (phase) {
+            case 'PRODUCAO': return 'Produção'
+            case 'MANUTENCAO': return 'Manutenção'
+            case 'DESATIVACAO': return 'Desativação'
+            case 'DESENVOLVIMENTO': return 'Desenvolvimento'
+            case 'PLANEJAMENTO': return 'Planejamento'
+            case 'APOSENTADO': return 'Aposentado'
+            default: return phase
+        }
+    }
+
+    const getCriticalityDisplayName = (criticality: string) => {
+        switch (criticality) {
+            case 'CRITICA': return 'Crítica'
+            case 'ALTA': return 'Alta'
+            case 'MEDIA': return 'Média'
+            case 'BAIXA': return 'Baixa'
+            default: return criticality
         }
     }
 
@@ -141,7 +170,7 @@ export function ApplicationsView() {
                                     <CardTitle className="text-lg">{app.name}</CardTitle>
                                     <div className="flex gap-1">
                                         <Badge className={getLifecycleBadgeColor(app.lifecyclePhase)}>
-                                            {app.lifecyclePhase}
+                                            {getLifecycleDisplayName(app.lifecyclePhase)}
                                         </Badge>
                                     </div>
                                 </div>
@@ -155,7 +184,7 @@ export function ApplicationsView() {
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium">Criticidade</span>
                                     <Badge className={getCriticalityColor(app.criticality)}>
-                                        {app.criticality}
+                                        {getCriticalityDisplayName(app.criticality)}
                                     </Badge>
                                 </div>
                                 
