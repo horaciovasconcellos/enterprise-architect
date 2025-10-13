@@ -18,6 +18,11 @@ interface Technology {
     maturityLevel?: string
     adoptionScore: number
     strategicFit?: string
+    version?: string
+    vendor?: string
+    licenseType?: string
+    supportLevel?: string
+    deploymentType?: string
 }
 
 interface TechnologyFormProps {
@@ -34,7 +39,12 @@ export function TechnologyFormNew({ technology, isOpen, onClose, onSuccess }: Te
         category: technology?.category || '',
         maturityLevel: technology?.maturityLevel || 'MAINSTREAM',
         adoptionScore: technology?.adoptionScore || 0,
-        strategicFit: technology?.strategicFit || 'ADEQUADO'
+        strategicFit: technology?.strategicFit || 'ADEQUADO',
+        version: technology?.version || '',
+        vendor: technology?.vendor || '',
+        licenseType: technology?.licenseType || '',
+        supportLevel: technology?.supportLevel || '',
+        deploymentType: technology?.deploymentType || ''
     })
 
     // Resetar o formulário quando a tecnologia mudar
@@ -46,7 +56,12 @@ export function TechnologyFormNew({ technology, isOpen, onClose, onSuccess }: Te
                 category: technology.category || '',
                 maturityLevel: technology.maturityLevel || 'MAINSTREAM',
                 adoptionScore: technology.adoptionScore || 0,
-                strategicFit: technology.strategicFit || 'ADEQUADO'
+                strategicFit: technology.strategicFit || 'ADEQUADO',
+                version: technology.version || '',
+                vendor: technology.vendor || '',
+                licenseType: technology.licenseType || '',
+                supportLevel: technology.supportLevel || '',
+                deploymentType: technology.deploymentType || ''
             })
         } else {
             setFormData({
@@ -55,7 +70,12 @@ export function TechnologyFormNew({ technology, isOpen, onClose, onSuccess }: Te
                 category: '',
                 maturityLevel: 'MAINSTREAM',
                 adoptionScore: 0,
-                strategicFit: 'ADEQUADO'
+                strategicFit: 'ADEQUADO',
+                version: '',
+                vendor: '',
+                licenseType: '',
+                supportLevel: '',
+                deploymentType: ''
             })
         }
     }, [technology, isOpen])
@@ -86,6 +106,32 @@ export function TechnologyFormNew({ technology, isOpen, onClose, onSuccess }: Te
         { value: 'EXCELENTE', label: 'Excelente' }
     ]
 
+    const licenseTypes = [
+        'Código Aberto',
+        'Comercial',
+        'Freemium',
+        'Assinatura',
+        'Perpetua',
+        'Personalizada'
+    ]
+
+    const supportLevels = [
+        'Básico',
+        'Padrão',
+        'Premium',
+        'Enterprise',
+        'Comunidade',
+        'Sem Suporte'
+    ]
+
+    const deploymentTypes = [
+        'On-Premise',
+        'Cloud',
+        'SaaS',
+        'PaaS',
+        'IaaS'
+    ]
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         
@@ -101,7 +147,12 @@ export function TechnologyFormNew({ technology, isOpen, onClose, onSuccess }: Te
                 category: formData.category || undefined,
                 maturityLevel: formData.maturityLevel,
                 adoptionScore: formData.adoptionScore,
-                strategicFit: formData.strategicFit
+                strategicFit: formData.strategicFit,
+                version: formData.version.trim() || undefined,
+                vendor: formData.vendor.trim() || undefined,
+                licenseType: formData.licenseType || undefined,
+                supportLevel: formData.supportLevel || undefined,
+                deploymentType: formData.deploymentType || undefined
             }
 
             let response
@@ -200,6 +251,87 @@ export function TechnologyFormNew({ technology, isOpen, onClose, onSuccess }: Te
                                         {maturityLevelOptions.map((option) => (
                                             <SelectItem key={option.value} value={option.value}>
                                                 {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="version">Versão</Label>
+                                <Input
+                                    id="version"
+                                    value={formData.version}
+                                    onChange={(e) => handleInputChange('version', e.target.value)}
+                                    placeholder="Ex: 14.2, 2.1.0, latest"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="vendor">Fornecedor</Label>
+                                <Input
+                                    id="vendor"
+                                    value={formData.vendor}
+                                    onChange={(e) => handleInputChange('vendor', e.target.value)}
+                                    placeholder="Ex: Microsoft, Oracle, Open Source"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="licenseType">Tipo de Licença</Label>
+                                <Select 
+                                    value={formData.licenseType} 
+                                    onValueChange={(value) => handleInputChange('licenseType', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o tipo" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {licenseTypes.map((type) => (
+                                            <SelectItem key={type} value={type}>
+                                                {type}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="supportLevel">Nível de Suporte</Label>
+                                <Select 
+                                    value={formData.supportLevel} 
+                                    onValueChange={(value) => handleInputChange('supportLevel', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o nível" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {supportLevels.map((level) => (
+                                            <SelectItem key={level} value={level}>
+                                                {level}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="deploymentType">Tipo de Deploy</Label>
+                                <Select 
+                                    value={formData.deploymentType} 
+                                    onValueChange={(value) => handleInputChange('deploymentType', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o tipo" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {deploymentTypes.map((type) => (
+                                            <SelectItem key={type} value={type}>
+                                                {type}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

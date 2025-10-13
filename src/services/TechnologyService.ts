@@ -9,6 +9,11 @@ export interface Technology {
   maturityLevel?: string
   adoptionScore: number
   strategicFit?: string
+  version?: string
+  vendor?: string
+  licenseType?: string
+  supportLevel?: string
+  deploymentType?: string
 }
 
 export class TechnologyService {
@@ -22,7 +27,12 @@ export class TechnologyService {
           category,
           maturity_level as maturityLevel,
           adoption_score as adoptionScore,
-          strategic_fit as strategicFit
+          strategic_fit as strategicFit,
+          version,
+          vendor,
+          license_type as licenseType,
+          support_level as supportLevel,
+          deployment_type as deploymentType
         FROM technologies
         ORDER BY name
       `)
@@ -43,7 +53,12 @@ export class TechnologyService {
           category,
           maturity_level as maturityLevel,
           adoption_score as adoptionScore,
-          strategic_fit as strategicFit
+          strategic_fit as strategicFit,
+          version,
+          vendor,
+          license_type as licenseType,
+          support_level as supportLevel,
+          deployment_type as deploymentType
         FROM technologies
         WHERE id = ?
       `, [id])
@@ -60,9 +75,22 @@ export class TechnologyService {
     try {
       const id = uuidv4()
       await pool.execute(`
-        INSERT INTO technologies (id, name, description, category, maturity_level, adoption_score, strategic_fit)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `, [id, data.name, data.description || null, data.category || null, data.maturityLevel || null, data.adoptionScore, data.strategicFit || null])
+        INSERT INTO technologies (id, name, description, category, maturity_level, adoption_score, strategic_fit, version, vendor, license_type, support_level, deployment_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        id, 
+        data.name, 
+        data.description || null, 
+        data.category || null, 
+        data.maturityLevel || null, 
+        data.adoptionScore, 
+        data.strategicFit || null,
+        data.version || null,
+        data.vendor || null,
+        data.licenseType || null,
+        data.supportLevel || null,
+        data.deploymentType || null
+      ])
       
       const created = await this.findById(id)
       return created!
@@ -76,9 +104,32 @@ export class TechnologyService {
     try {
       await pool.execute(`
         UPDATE technologies SET
-          name = ?, description = ?, category = ?, maturity_level = ?, adoption_score = ?, strategic_fit = ?
+          name = ?, 
+          description = ?, 
+          category = ?, 
+          maturity_level = ?, 
+          adoption_score = ?, 
+          strategic_fit = ?,
+          version = ?,
+          vendor = ?,
+          license_type = ?,
+          support_level = ?,
+          deployment_type = ?
         WHERE id = ?
-      `, [data.name, data.description || null, data.category || null, data.maturityLevel || null, data.adoptionScore, data.strategicFit || null, id])
+      `, [
+        data.name, 
+        data.description || null, 
+        data.category || null, 
+        data.maturityLevel || null, 
+        data.adoptionScore, 
+        data.strategicFit || null,
+        data.version || null,
+        data.vendor || null,
+        data.licenseType || null,
+        data.supportLevel || null,
+        data.deploymentType || null,
+        id
+      ])
       
       const updated = await this.findById(id)
       return updated!

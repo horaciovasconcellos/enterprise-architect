@@ -22,6 +22,11 @@ CREATE TABLE IF NOT EXISTS technologies (
     maturity_level ENUM('EXPERIMENTAL', 'EMERGING', 'MAINSTREAM', 'LEGACY') DEFAULT 'MAINSTREAM',
     adoption_score INT DEFAULT 0,
     strategic_fit ENUM('MUITO_RUIM', 'RUIM', 'ADEQUADO', 'BOM', 'EXCELENTE'),
+    version VARCHAR(50),
+    vendor VARCHAR(255),
+    license_type VARCHAR(100),
+    support_level VARCHAR(100),
+    deployment_type VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
