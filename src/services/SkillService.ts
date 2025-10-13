@@ -33,6 +33,8 @@ export interface SkillDeveloper {
 export class SkillService {
   static async findAll(): Promise<Skill[]> {
     try {
+      console.log('🔍 SkillService.findAll - Buscando todas as skills')
+      
       const [rows] = await pool.execute(`
         SELECT 
           id,
@@ -44,15 +46,29 @@ export class SkillService {
         FROM skills
         ORDER BY name
       `)
-      return rows as Skill[]
+      
+      const skills = rows as Skill[]
+      console.log(`📊 SkillService.findAll - Encontradas ${skills.length} skills`)
+
+      // Buscar tecnologias e desenvolvedores para cada skill
+      for (const skill of skills) {
+        skill.technologies = await this.getTechnologies(skill.id)
+        skill.developers = await this.getDevelopers(skill.id)
+        
+        console.log(`  ✅ Skill "${skill.name}": ${skill.technologies.length} tecnologias, ${skill.developers.length} desenvolvedores`)
+      }
+
+      return skills
     } catch (error) {
-      console.error('Error finding skills:', error)
+      console.error('❌ Error finding skills:', error)
       throw error
     }
   }
 
   static async findById(id: string): Promise<Skill | null> {
     try {
+      console.log(`🔍 SkillService.findById - Buscando skill: ${id}`)
+      
       const [rows] = await pool.execute(
         `SELECT 
           id,
@@ -67,9 +83,13 @@ export class SkillService {
       )
       
       const skills = rows as Skill[]
-      if (skills.length === 0) return null
+      if (skills.length === 0) {
+        console.log(`⚠️  SkillService.findById - Skill não encontrada: ${id}`)
+        return null
+      }
 
       const skill = skills[0]
+      console.log(`📊 SkillService.findById - Skill encontrada: "${skill.name}"`)
 
       // Buscar tecnologias associadas
       skill.technologies = await this.getTechnologies(id)
@@ -77,9 +97,11 @@ export class SkillService {
       // Buscar desenvolvedores associados
       skill.developers = await this.getDevelopers(id)
 
+      console.log(`  ✅ Skill completa: ${skill.technologies.length} tecnologias, ${skill.developers.length} desenvolvedores`)
+
       return skill
     } catch (error) {
-      console.error('Error finding skill by id:', error)
+      console.error('❌ Error finding skill by id:', error)
       throw error
     }
   }
@@ -100,9 +122,11 @@ export class SkillService {
         ORDER BY t.name
       `, [skillId])
       
+      console.log(`    🔧 getTechnologies(${skillId}): ${(rows as any[]).length} tecnologias encontradas`)
+      
       return rows as SkillTechnology[]
     } catch (error) {
-      console.error('Error getting skill technologies:', error)
+      console.error('❌ Error getting skill technologies:', error)
       throw error
     }
   }
@@ -123,9 +147,11 @@ export class SkillService {
         ORDER BY o.nome
       `, [skillId])
       
+      console.log(`    👨‍💻 getDevelopers(${skillId}): ${(rows as any[]).length} desenvolvedores encontrados`)
+      
       return rows as SkillDeveloper[]
     } catch (error) {
-      console.error('Error getting skill developers:', error)
+      console.error('❌ Error getting skill developers:', error)
       throw error
     }
   }
@@ -137,6 +163,14 @@ export class SkillService {
       await connection.beginTransaction()
 
       const skillId = uuidv4()
+      
+      console.log('🔵 Criando skill:', {
+        skillId,
+        name: skill.name,
+        code: skill.code,
+        technologiesCount: skill.technologies?.length || 0,
+        developersCount: skill.developers?.length || 0
+      })
       
       // Inserir skill
       await connection.execute(
@@ -154,7 +188,12 @@ export class SkillService {
 
       // Inserir tecnologias associadas
       if (skill.technologies && skill.technologies.length > 0) {
+        console.log('🔵 Inserindo tecnologias:', skill.technologies)
         for (const tech of skill.technologies) {
+          if (!tech.technologyId || tech.technologyId === '') {
+            console.warn('⚠️  Tecnologia sem ID, pulando:', tech)
+            continue
+          }
           await connection.execute(
             `INSERT INTO skill_technologies (id, skill_id, technology_id, proficiency_level, start_date, end_date)
              VALUES (?, ?, ?, ?, ?, ?)`,
@@ -172,7 +211,12 @@ export class SkillService {
 
       // Inserir desenvolvedores associados
       if (skill.developers && skill.developers.length > 0) {
+        console.log('🔵 Inserindo desenvolvedores:', skill.developers)
         for (const dev of skill.developers) {
+          if (!dev.ownerId || dev.ownerId === '') {
+            console.warn('⚠️  Desenvolvedor sem ID, pulando:', dev)
+            continue
+          }
           await connection.execute(
             `INSERT INTO skill_developers (id, skill_id, owner_id, proficiency_level, certification_date, notes)
              VALUES (?, ?, ?, ?, ?, ?)`,
@@ -189,12 +233,13 @@ export class SkillService {
       }
 
       await connection.commit()
+      console.log('✅ Skill criada com sucesso:', skillId)
 
       const createdSkill = await this.findById(skillId)
       return createdSkill!
     } catch (error) {
       await connection.rollback()
-      console.error('Error creating skill:', error)
+      console.error('❌ Error creating skill:', error)
       throw error
     } finally {
       connection.release()

@@ -411,20 +411,24 @@ app.get('/api/skills/:id', async (req, res) => {
 
 app.post('/api/skills', async (req, res) => {
   try {
+    console.log('📝 Dados recebidos para criar skill:', JSON.stringify(req.body, null, 2))
     const skill = await SkillService.create(req.body)
+    console.log('✅ Skill criada com sucesso:', skill.id)
     res.status(201).json(skill)
   } catch (error) {
-    console.error('Erro ao criar habilidade:', error)
+    console.error('❌ Erro ao criar habilidade:', error)
     res.status(500).json({ error: 'Erro ao criar habilidade' })
   }
 })
 
 app.put('/api/skills/:id', async (req, res) => {
   try {
+    console.log(`📝 Dados recebidos para atualizar skill ${req.params.id}:`, JSON.stringify(req.body, null, 2))
     const skill = await SkillService.update(req.params.id, req.body)
+    console.log('✅ Skill atualizada com sucesso')
     res.json(skill)
   } catch (error) {
-    console.error('Erro ao atualizar habilidade:', error)
+    console.error('❌ Erro ao atualizar habilidade:', error)
     res.status(500).json({ error: 'Erro ao atualizar habilidade' })
   }
 })

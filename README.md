@@ -138,6 +138,26 @@ O diretório `data/` contém exemplos prontos:
 ### Sistema de Habilidades
 - **[SKILLS_SYSTEM.md](./SKILLS_SYSTEM.md)** - Documentação completa do sistema de Skills
 - **[SKILLS_IMPLEMENTATION_SUMMARY.md](./SKILLS_IMPLEMENTATION_SUMMARY.md)** - Resumo de implementação
+- **[docs/001-documentacao/FIX_SKILLS_ASSOCIATIONS.md](./docs/001-documentacao/FIX_SKILLS_ASSOCIATIONS.md)** - Correção de bug de associações
+
+### Troubleshooting
+- **[DEBUG_SKILLS_FORM.md](./DEBUG_SKILLS_FORM.md)** - Debug do formulário de skills
+
+## 🧪 Testes
+
+### Testar Skills Associations
+
+```bash
+# Validar se tecnologias e desenvolvedores estão sendo carregados
+./scripts/test-skills-associations.sh
+```
+
+Este script verifica:
+- ✅ API respondendo corretamente
+- ✅ Campo `technologies` presente nas respostas
+- ✅ Campo `developers` presente nas respostas
+- ✅ `findAll()` retornando associações
+- ✅ `findById()` retornando associações
 
 ## 🧠 O que você pode fazer?
 

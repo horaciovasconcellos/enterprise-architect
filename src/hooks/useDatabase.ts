@@ -586,6 +586,14 @@ export function useSkills() {
 
   const createSkill = async (skillData: any) => {
     try {
+      console.log('🚀 useDatabase.createSkill - Dados que serão enviados:', {
+        ...skillData,
+        technologiesCount: skillData.technologies?.length || 0,
+        developersCount: skillData.developers?.length || 0,
+        technologiesData: skillData.technologies,
+        developersData: skillData.developers
+      })
+
       const response = await fetch(`${API_BASE_URL}/skills`, {
         method: 'POST',
         headers: {
@@ -594,21 +602,33 @@ export function useSkills() {
         body: JSON.stringify(skillData),
       })
 
+      console.log('📡 useDatabase.createSkill - Response status:', response.status)
+
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ useDatabase.createSkill - Erro na resposta:', errorText)
         throw new Error('Erro ao criar habilidade')
       }
 
       const newSkill = await response.json()
+      console.log('✅ useDatabase.createSkill - Skill criada:', newSkill.id)
       setData((current: any[]) => [...current, newSkill])
       return newSkill
     } catch (error) {
-      console.error('Erro ao criar habilidade:', error)
+      console.error('❌ useDatabase.createSkill - Erro:', error)
       throw error
     }
   }
 
   const updateSkill = async (id: string, skillData: any) => {
     try {
+      console.log('🚀 useDatabase.updateSkill - Dados que serão enviados:', {
+        id,
+        ...skillData,
+        technologiesCount: skillData.technologies?.length || 0,
+        developersCount: skillData.developers?.length || 0
+      })
+
       const response = await fetch(`${API_BASE_URL}/skills/${id}`, {
         method: 'PUT',
         headers: {
@@ -617,11 +637,16 @@ export function useSkills() {
         body: JSON.stringify(skillData),
       })
 
+      console.log('📡 useDatabase.updateSkill - Response status:', response.status)
+
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ useDatabase.updateSkill - Erro na resposta:', errorText)
         throw new Error('Erro ao atualizar habilidade')
       }
 
       const updatedSkill = await response.json()
+      console.log('✅ useDatabase.updateSkill - Skill atualizada:', updatedSkill.id)
       setData((current: any[]) => 
         current.map(skill => skill.id === id ? updatedSkill : skill)
       )
