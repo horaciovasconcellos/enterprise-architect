@@ -579,3 +579,83 @@ export function useRelationships() {
     deleteRelationship
   }
 }
+
+// Hook para habilidades (skills)
+export function useSkills() {
+  const { data, loading, error, refetch, setData } = useApi<any[]>('/skills', [])
+
+  const createSkill = async (skillData: any) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/skills`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(skillData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao criar habilidade')
+      }
+
+      const newSkill = await response.json()
+      setData((current: any[]) => [...current, newSkill])
+      return newSkill
+    } catch (error) {
+      console.error('Erro ao criar habilidade:', error)
+      throw error
+    }
+  }
+
+  const updateSkill = async (id: string, skillData: any) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/skills/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(skillData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar habilidade')
+      }
+
+      const updatedSkill = await response.json()
+      setData((current: any[]) => 
+        current.map(skill => skill.id === id ? updatedSkill : skill)
+      )
+      return updatedSkill
+    } catch (error) {
+      console.error('Erro ao atualizar habilidade:', error)
+      throw error
+    }
+  }
+
+  const deleteSkill = async (id: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/skills/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao deletar habilidade')
+      }
+
+      setData((current: any[]) => current.filter(skill => skill.id !== id))
+    } catch (error) {
+      console.error('Erro ao deletar habilidade:', error)
+      throw error
+    }
+  }
+
+  return {
+    skills: data,
+    loading,
+    error,
+    refetch,
+    createSkill,
+    updateSkill,
+    deleteSkill
+  }
+}

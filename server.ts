@@ -9,6 +9,7 @@ import { OwnerService } from './src/services/OwnerService'
 import { ProcessService } from './src/services/ProcessService'
 import { InterfaceService } from './src/services/InterfaceService'
 import { RelationshipService } from './src/services/RelationshipService'
+import { SkillService } from './src/services/SkillService'
 
 dotenv.config()
 
@@ -381,6 +382,60 @@ app.delete('/api/relationships/:ownerId/:applicationId/:relationshipType', async
     res.status(204).send()
   } catch (error) {
     res.status(500).json({ error: 'Erro ao deletar relacionamento' })
+  }
+})
+
+// Routes para Skills
+app.get('/api/skills', async (req, res) => {
+  try {
+    const skills = await SkillService.findAll()
+    res.json(skills)
+  } catch (error) {
+    console.error('Erro ao buscar habilidades:', error)
+    res.status(500).json({ error: 'Erro ao buscar habilidades' })
+  }
+})
+
+app.get('/api/skills/:id', async (req, res) => {
+  try {
+    const skill = await SkillService.findById(req.params.id)
+    if (!skill) {
+      return res.status(404).json({ error: 'Habilidade não encontrada' })
+    }
+    res.json(skill)
+  } catch (error) {
+    console.error('Erro ao buscar habilidade:', error)
+    res.status(500).json({ error: 'Erro ao buscar habilidade' })
+  }
+})
+
+app.post('/api/skills', async (req, res) => {
+  try {
+    const skill = await SkillService.create(req.body)
+    res.status(201).json(skill)
+  } catch (error) {
+    console.error('Erro ao criar habilidade:', error)
+    res.status(500).json({ error: 'Erro ao criar habilidade' })
+  }
+})
+
+app.put('/api/skills/:id', async (req, res) => {
+  try {
+    const skill = await SkillService.update(req.params.id, req.body)
+    res.json(skill)
+  } catch (error) {
+    console.error('Erro ao atualizar habilidade:', error)
+    res.status(500).json({ error: 'Erro ao atualizar habilidade' })
+  }
+})
+
+app.delete('/api/skills/:id', async (req, res) => {
+  try {
+    await SkillService.delete(req.params.id)
+    res.status(204).send()
+  } catch (error) {
+    console.error('Erro ao deletar habilidade:', error)
+    res.status(500).json({ error: 'Erro ao deletar habilidade' })
   }
 })
 
