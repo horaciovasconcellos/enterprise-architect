@@ -1,4 +1,4 @@
-import { useKV } from '@github/spark/hooks'
+import { useApplications, useCapabilities } from '@/hooks/useDatabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -27,15 +27,24 @@ interface Interface {
 }
 
 export function DashboardView() {
-    const [applications] = useKV<Application[]>('applications', [])
-    const [capabilities] = useKV<Capability[]>('capabilities', [])
-    const [interfaces] = useKV<Interface[]>('interfaces', [])
+    const { applications, loading: loadingApps } = useApplications()
+    const { capabilities, loading: loadingCaps } = useCapabilities()
+    // TODO: Criar hook para interfaces quando necessário
+    const interfaces: any[] = []
 
-    const criticalApps = (applications || []).filter(app => app.criticality === 'CRITICAL').length
+    if (loadingApps || loadingCaps) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg">Carregando dashboard...</div>
+            </div>
+        )
+    }
+
+    const criticalApps = (applications || []).filter(app => app.criticality === 'CRITICA').length
     const totalApps = (applications || []).length
     const avgHealthScore = totalApps > 0 ? (applications || []).reduce((sum, app) => sum + (app.healthScore || 0), 0) / totalApps : 0
 
-    const criticalCapabilities = (capabilities || []).filter(cap => cap.criticality === 'CRITICAL').length
+    const criticalCapabilities = (capabilities || []).filter(cap => cap.criticality === 'CRÍTICA').length
     const avgCoverageScore = (capabilities || []).length > 0 ? (capabilities || []).reduce((sum, cap) => sum + (cap.coverageScore || 0), 0) / (capabilities || []).length : 0
 
     const totalInterfaces = (interfaces || []).length

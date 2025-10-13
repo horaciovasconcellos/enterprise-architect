@@ -1,38 +1,58 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useInterfaces } from '@/hooks/useDatabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, ShareNetwork, FunnelSimple } from '@phosphor-icons/react'
+import { Plus, ShareNetwork, FunnelSimple, PencilSimple, Trash } from '@phosphor-icons/react'
+import { toast } from 'sonner'
+import { InterfaceFormSimple } from '@/components/forms/InterfaceFormSimple'
 
 interface Interface {
     id: string
     sourceApp: string
     targetApp: string
-    type: string
+    interfaceType: string
     frequency: string
-    protocol?: string
     description?: string
 }
 
 export function InterfacesView() {
-    const [interfaces, setInterfaces] = useKV<Interface[]>('interfaces', [])
-    const [applications] = useKV<any[]>('applications', [])
+    const { interfaces, loading, error, deleteInterface, refetch } = useInterfaces() 
     const [filter, setFilter] = useState<string>('')
+    const [showForm, setShowForm] = useState(false)
+    const [editingInterface, setEditingInterface] = useState<Interface | undefined>()
 
     const handleAddInterface = () => {
-        const sourceApp = prompt('Aplicação de Origem:')
-        const targetApp = prompt('Aplicação de Destino:')
-        if (sourceApp && targetApp) {
-            const newInterface: Interface = {
-                id: Date.now().toString(),
-                sourceApp,
-                targetApp,
-                type: 'API_REST',
-                frequency: 'TEMPO_REAL'
+        setEditingInterface(undefined)
+        setShowForm(true)
+    }
+
+    const handleEditInterface = (interfaceItem: Interface) => {
+        setEditingInterface(interfaceItem)
+        setShowForm(true)
+    }
+
+    const handleDeleteInterface = async (id: string) => {
+        if (confirm('Tem certeza que deseja excluir esta interface?')) {
+            try {
+                await deleteInterface(id)
+                toast.success('Interface removida com sucesso')
+            } catch (error) {
+                toast.error('Erro ao deletar interface')
+                console.error('Erro ao deletar interface:', error)
             }
-            setInterfaces((current) => [...(current || []), newInterface])
         }
+    }
+
+    const handleFormSuccess = () => {
+        refetch()
+        setShowForm(false)
+        setEditingInterface(undefined)
+    }
+
+    const handleCancelForm = () => {
+        setShowForm(false)
+        setEditingInterface(undefined)
     }
 
     const filteredInterfaces = (interfaces || []).filter(iface =>
@@ -41,12 +61,14 @@ export function InterfacesView() {
         (iface.description?.toLowerCase().includes(filter.toLowerCase()))
     )
 
-    const getTypeColor = (type: string) => {
-        switch (type) {
+    const getTypeColor = (interfaceType: string) => {
+        switch (interfaceType) {
             case 'API_REST': return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
-            case 'API_GRAPHQL': return 'bg-purple-500/10 text-purple-700 border-purple-500/20'
-            case 'FILE_TRANSFER': return 'bg-green-500/10 text-green-700 border-green-500/20'
-            case 'MESSAGE_QUEUE': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
+            case 'API_SOAP': return 'bg-purple-500/10 text-purple-700 border-purple-500/20'
+            case 'ARQUIVO_BATCH': return 'bg-green-500/10 text-green-700 border-green-500/20'
+            case 'MENSAGERIA': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
+            case 'BANCO_DADOS': return 'bg-red-500/10 text-red-700 border-red-500/20'
+            case 'WEBHOOK': return 'bg-indigo-500/10 text-indigo-700 border-indigo-500/20'
             default: return 'bg-gray-500/10 text-gray-700 border-gray-500/20'
         }
     }
@@ -54,11 +76,29 @@ export function InterfacesView() {
     const getFrequencyColor = (frequency: string) => {
         switch (frequency) {
             case 'TEMPO_REAL': return 'bg-red-500/10 text-red-700 border-red-500/20'
-            case 'QUASE_TEMPO_REAL': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
-            case 'HORÁRIO': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
-            case 'DIÁRIO': return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
+            case 'HORARIO': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
+            case 'DIARIO': return 'bg-blue-500/10 text-blue-700 border-blue-500/20' 
+            case 'SEMANAL': return 'bg-green-500/10 text-green-700 border-green-500/20'
+            case 'MENSAL': return 'bg-purple-500/10 text-purple-700 border-purple-500/20'
+            case 'SOB_DEMANDA': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
             default: return 'bg-gray-500/10 text-gray-700 border-gray-500/20'
         }
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg">Carregando interfaces...</div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg text-red-600">Erro ao carregar interfaces: {error}</div>
+            </div>
+        )
     }
 
     return (
@@ -121,17 +161,29 @@ export function InterfacesView() {
                                     </div>
                                     
                                     <div className="flex items-center gap-2">
-                                        <Badge className={getTypeColor(iface.type)}>
-                                            {iface.type.replace('_', ' ')}
+                                        <Badge className={getTypeColor(iface.interfaceType)}>
+                                            {iface.interfaceType.replace('_', ' ')}
                                         </Badge>
                                         <Badge className={getFrequencyColor(iface.frequency)}>
                                             {iface.frequency.replace('_', ' ')}
                                         </Badge>
-                                        {iface.protocol && (
-                                            <Badge variant="outline">
-                                                {iface.protocol}
-                                            </Badge>
-                                        )}
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleEditInterface(iface)}
+                                            >
+                                                <PencilSimple size={14} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDeleteInterface(iface.id)}
+                                                className="text-destructive hover:text-destructive"
+                                            >
+                                                <Trash size={14} />
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -159,7 +211,7 @@ export function InterfacesView() {
                             </div>
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-foreground">
-                                    {(interfaces || []).filter(i => i.type === 'API_REST').length}
+                                    {(interfaces || []).filter(i => i.interfaceType === 'API_REST').length}
                                 </div>
                                 <div className="text-sm text-muted-foreground">APIs REST</div>
                             </div>
@@ -179,6 +231,13 @@ export function InterfacesView() {
                     </CardContent>
                 </Card>
             )}
+
+            <InterfaceFormSimple
+                interface={editingInterface}
+                isOpen={showForm}
+                onClose={handleCancelForm}
+                onSuccess={handleFormSuccess}
+            />
         </div>
     )
 }

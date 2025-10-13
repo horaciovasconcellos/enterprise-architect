@@ -5,14 +5,15 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { useKV } from '@github/spark/hooks'
+import { useOwners } from '@/hooks/useDatabase'
 
 export interface Owner {
     id: string
     matricula: string
     nome: string
     area: string
-    createdAt: string
+    createdAt?: string
+    updatedAt?: string
 }
 
 interface OwnerFormProps {
@@ -22,7 +23,7 @@ interface OwnerFormProps {
 }
 
 export function OwnerForm({ owner, onSubmit, onCancel }: OwnerFormProps) {
-    const [owners, setOwners] = useKV<Owner[]>('owners', [])
+    const { owners, createOwner, updateOwner } = useOwners()
     const [formData, setFormData] = useState({
         matricula: owner?.matricula || '',
         nome: owner?.nome || '',
@@ -42,7 +43,7 @@ export function OwnerForm({ owner, onSubmit, onCancel }: OwnerFormProps) {
         'Produto'
     ]
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         
         if (!formData.matricula || !formData.nome || !formData.area) {
@@ -57,27 +58,29 @@ export function OwnerForm({ owner, onSubmit, onCancel }: OwnerFormProps) {
             return
         }
 
-        const newOwner: Owner = {
-            id: owner?.id || `owner-${Date.now()}`,
-            matricula: formData.matricula,
-            nome: formData.nome,
-            area: formData.area,
-            createdAt: owner?.createdAt || new Date().toISOString()
-        }
+        try {
+            const ownerData = {
+                matricula: formData.matricula,
+                nome: formData.nome,
+                area: formData.area
+            }
 
-        if (owner) {
-            // Update existing
-            setOwners(currentOwners => 
-                (currentOwners || []).map(o => o.id === owner.id ? newOwner : o)
-            )
-            toast.success('Proprietário atualizado com sucesso')
-        } else {
-            // Add new
-            setOwners(currentOwners => [...(currentOwners || []), newOwner])
-            toast.success('Proprietário criado com sucesso')
-        }
+            let result: Owner
+            if (owner) {
+                // Update existing
+                result = await updateOwner(owner.id, ownerData)
+                toast.success('Proprietário atualizado com sucesso')
+            } else {
+                // Add new
+                result = await createOwner(ownerData)
+                toast.success('Proprietário criado com sucesso')
+            }
 
-        onSubmit?.(newOwner)
+            onSubmit?.(result)
+        } catch (error) {
+            toast.error(owner ? 'Erro ao atualizar proprietário' : 'Erro ao criar proprietário')
+            console.error('Erro no formulário de proprietário:', error)
+        }
     }
 
     const handleInputChange = (field: string, value: string) => {

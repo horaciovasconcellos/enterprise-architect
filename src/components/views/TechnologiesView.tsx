@@ -1,27 +1,25 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useTechnologies } from '@/hooks/useDatabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Plus, Gear, FunnelSimple, PencilSimple, Trash } from '@phosphor-icons/react'
-import { TechnologyForm } from '../forms/TechnologyForm'
+import { TechnologyFormNew } from '../forms/TechnologyFormNew'
+import { toast } from 'sonner'
 
 interface Technology {
     id: string
     name: string
     description?: string
-    category: string
-    healthScore: number
-    version?: string
-    vendor?: string
-    licenseType?: string
-    supportLevel?: string
-    deploymentType?: string
+    category?: string
+    maturityLevel?: string
+    adoptionScore: number
+    strategicFit?: string
 }
 
 export function TechnologiesView() {
-    const [technologies, setTechnologies] = useKV<Technology[]>('technologies', [])
+    const { technologies, loading, error, deleteTechnology, refetch } = useTechnologies()
     const [showForm, setShowForm] = useState(false)
     const [editingTechnology, setEditingTechnology] = useState<Technology | undefined>()
     const [filter, setFilter] = useState<string>('')
@@ -36,30 +34,20 @@ export function TechnologiesView() {
         setShowForm(true)
     }
 
-    const handleDeleteTechnology = (id: string) => {
+    const handleDeleteTechnology = async (id: string) => {
         if (confirm('Tem certeza que deseja excluir esta tecnologia?')) {
-            setTechnologies((current) => (current || []).filter(tech => tech.id !== id))
+            try {
+                await deleteTechnology(id)
+                toast.success('Tecnologia removida com sucesso')
+            } catch (error) {
+                toast.error('Erro ao deletar tecnologia')
+                console.error('Erro ao deletar tecnologia:', error)
+            }
         }
     }
 
-    const handleSubmitTechnology = (technologyData: Omit<Technology, 'id'>) => {
-        if (editingTechnology) {
-            // Update existing technology
-            setTechnologies((current) => 
-                (current || []).map(tech => 
-                    tech.id === editingTechnology.id 
-                        ? { ...technologyData, id: editingTechnology.id }
-                        : tech
-                )
-            )
-        } else {
-            // Create new technology
-            const newTechnology: Technology = {
-                ...technologyData,
-                id: Date.now().toString()
-            }
-            setTechnologies((current) => [...(current || []), newTechnology])
-        }
+    const handleFormSuccess = () => {
+        refetch()
         setShowForm(false)
         setEditingTechnology(undefined)
     }
@@ -72,18 +60,68 @@ export function TechnologiesView() {
     const filteredTechnologies = (technologies || []).filter(tech =>
         tech.name.toLowerCase().includes(filter.toLowerCase()) ||
         (tech.description?.toLowerCase().includes(filter.toLowerCase())) ||
-        tech.category.toLowerCase().includes(filter.toLowerCase())
+        (tech.category?.toLowerCase().includes(filter.toLowerCase()))
     )
 
-    const getCategoryColor = (category: string) => {
+    const getCategoryColor = (category?: string) => {
         switch (category) {
-            case 'INFRAESTRUTURA': return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
-            case 'BANCO DE DADOS': return 'bg-green-500/10 text-green-700 border-green-500/20'
-            case 'PLATAFORMA': return 'bg-purple-500/10 text-purple-700 border-purple-500/20'
-            case 'MIDDLEWARE': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
-            case 'APLICAÇÃO': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
+            case 'Database': return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
+            case 'Frontend': return 'bg-green-500/10 text-green-700 border-green-500/20'
+            case 'Backend': return 'bg-purple-500/10 text-purple-700 border-purple-500/20'
+            case 'Infrastructure': return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
+            case 'DevOps': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20'
+            case 'Security': return 'bg-red-500/10 text-red-700 border-red-500/20'
+            case 'Analytics': return 'bg-indigo-500/10 text-indigo-700 border-indigo-500/20'
+            case 'Integration': return 'bg-teal-500/10 text-teal-700 border-teal-500/20'
             default: return 'bg-gray-500/10 text-gray-700 border-gray-500/20'
         }
+    }
+
+    const getMaturityColor = (maturityLevel?: string) => {
+        switch (maturityLevel) {
+            case 'EXPERIMENTAL': return 'bg-red-100 text-red-800'
+            case 'EMERGING': return 'bg-yellow-100 text-yellow-800'
+            case 'MAINSTREAM': return 'bg-green-100 text-green-800'
+            case 'LEGACY': return 'bg-gray-100 text-gray-800'
+            default: return 'bg-gray-100 text-gray-800'
+        }
+    }
+
+    const getStrategicFitLabel = (strategicFit?: string) => {
+        switch (strategicFit) {
+            case 'MUITO_RUIM': return 'Muito Ruim'
+            case 'RUIM': return 'Ruim'
+            case 'ADEQUADO': return 'Adequado'
+            case 'BOM': return 'Bom'
+            case 'EXCELENTE': return 'Excelente'
+            default: return 'N/A'
+        }
+    }
+
+    const getMaturityLabel = (maturityLevel?: string) => {
+        switch (maturityLevel) {
+            case 'EXPERIMENTAL': return 'Experimental'
+            case 'EMERGING': return 'Emergente'
+            case 'MAINSTREAM': return 'Mainstream'
+            case 'LEGACY': return 'Legacy'
+            default: return 'N/A'
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg">Carregando tecnologias...</div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg text-red-600">Erro ao carregar tecnologias: {error}</div>
+            </div>
+        )
     }
 
     return (
@@ -139,19 +177,13 @@ export function TechnologiesView() {
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">
                                         <CardTitle className="text-lg">{technology.name}</CardTitle>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            {technology.version && (
-                                                <span className="text-sm text-muted-foreground">v{technology.version}</span>
-                                            )}
-                                            {technology.vendor && (
-                                                <span className="text-sm text-muted-foreground">• {technology.vendor}</span>
-                                            )}
-                                        </div>
+                                        {technology.category && (
+                                            <Badge className={getCategoryColor(technology.category)} variant="outline">
+                                                {technology.category}
+                                            </Badge>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Badge className={getCategoryColor(technology.category)}>
-                                            {technology.category}
-                                        </Badge>
                                         <div className="flex gap-1">
                                             <Button
                                                 variant="ghost"
@@ -180,34 +212,24 @@ export function TechnologiesView() {
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium">Pontuação de Saúde</span>
-                                        <span className="text-sm text-muted-foreground">{technology.healthScore}%</span>
+                                        <span className="text-sm font-medium">Pontuação de Adoção</span>
+                                        <span className="text-sm text-muted-foreground">{technology.adoptionScore}%</span>
                                     </div>
-                                    <Progress value={technology.healthScore} />
+                                    <Progress value={technology.adoptionScore} />
                                 </div>
                                 
                                 <div className="grid grid-cols-2 gap-4 text-sm">
-                                    {technology.licenseType && (
-                                        <div>
-                                            <span className="font-medium text-muted-foreground">Licença:</span>
-                                            <p className="text-foreground">{technology.licenseType}</p>
-                                        </div>
-                                    )}
-                                    {technology.supportLevel && (
-                                        <div>
-                                            <span className="font-medium text-muted-foreground">Suporte:</span>
-                                            <p className="text-foreground">{technology.supportLevel}</p>
-                                        </div>
-                                    )}
-                                    {technology.deploymentType && (
-                                        <div>
-                                            <span className="font-medium text-muted-foreground">Deploy:</span>
-                                            <p className="text-foreground">{technology.deploymentType}</p>
-                                        </div>
-                                    )}
                                     <div>
-                                        <span className="font-medium text-muted-foreground">Aplicações:</span>
-                                        <p className="text-foreground">{Math.floor(Math.random() * 8) + 1} usando</p>
+                                        <span className="font-medium text-muted-foreground">Maturidade:</span>
+                                        <div className="mt-1">
+                                            <Badge className={getMaturityColor(technology.maturityLevel)} variant="secondary">
+                                                {getMaturityLabel(technology.maturityLevel)}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span className="font-medium text-muted-foreground">Adequação:</span>
+                                        <p className="text-foreground">{getStrategicFitLabel(technology.strategicFit)}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -216,13 +238,12 @@ export function TechnologiesView() {
                 </div>
             )}
 
-            {showForm && (
-                <TechnologyForm
-                    technology={editingTechnology}
-                    onSubmit={handleSubmitTechnology}
-                    onCancel={handleCancelForm}
-                />
-            )}
+            <TechnologyFormNew
+                technology={editingTechnology}
+                isOpen={showForm}
+                onClose={handleCancelForm}
+                onSuccess={handleFormSuccess}
+            />
         </div>
     )
 }
