@@ -1,0 +1,16 @@
+name,description,category,maturityLevel,strategicImportance
+Gestão de Clientes,Capacidade de gerenciar relacionamento com clientes,Business,4,High
+Processamento de Pagamentos,Capacidade de processar transações financeiras,Business,5,Critical
+Análise de Dados,Capacidade de análise e visualização de dados,Analytics,3,High
+Gestão de Estoque,Capacidade de controlar inventário,Operations,4,High
+Notificações Multicanal,Capacidade de enviar notificações por múltiplos canais,Technical,3,Medium
+Autenticação e Autorização,Capacidade de gerenciar identidades e acessos,Security,4,Critical
+Integração de Sistemas,Capacidade de integrar diferentes sistemas,Technical,3,High
+Geração de Relatórios,Capacidade de gerar relatórios automatizados,Analytics,3,Medium
+Gestão de Vendas,Capacidade de gerenciar processo de vendas,Business,4,High
+DevOps e CI/CD,Capacidade de automação de deploy e operações,Technical,4,High
+Monitoramento e Observabilidade,Capacidade de monitorar sistemas em produção,Operations,3,High
+Backup e Recuperação,Capacidade de backup e disaster recovery,Operations,4,Critical
+Gestão de Documentos,Capacidade de gerenciar documentos corporativos,Business,2,Medium
+API Management,Capacidade de gerenciar APIs,Technical,3,High
+Cloud Infrastructure,Capacidade de provisionamento de infraestrutura cloud,Technical,3,High

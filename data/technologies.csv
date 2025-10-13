@@ -1,0 +1,21 @@
+name,version,category,description,vendor,licenseType,supportLevel
+Node.js,20,Runtime,JavaScript runtime built on Chrome's V8 engine,OpenJS Foundation,Open Source,Community
+Node.js,18,Runtime,JavaScript runtime built on Chrome's V8 engine,OpenJS Foundation,Open Source,LTS
+React,19,Frontend Framework,JavaScript library for building user interfaces,Meta,Open Source,Community
+Vue.js,3,Frontend Framework,Progressive JavaScript framework,Evan You,Open Source,Community
+Angular,17,Frontend Framework,Platform for building web applications,Google,Open Source,Enterprise
+TypeScript,5,Programming Language,Typed superset of JavaScript,Microsoft,Open Source,Enterprise
+PostgreSQL,16,Database,Advanced open source relational database,PostgreSQL Global Development Group,Open Source,Community
+PostgreSQL,15,Database,Advanced open source relational database,PostgreSQL Global Development Group,Open Source,Community
+MySQL,8,Database,Popular open source relational database,Oracle,Open Source,Community
+MongoDB,7,Database,NoSQL document database,MongoDB Inc.,Open Source,Enterprise
+Redis,7,Cache,In-memory data structure store,Redis Ltd.,Open Source,Enterprise
+Docker,24,Containerization,Container platform,Docker Inc.,Open Source,Enterprise
+Kubernetes,1.28,Orchestration,Container orchestration system,CNCF,Open Source,Enterprise
+Terraform,1.6,Infrastructure as Code,Infrastructure automation tool,HashiCorp,Open Source,Enterprise
+AWS,2023,Cloud Platform,Amazon Web Services cloud platform,Amazon,Commercial,Enterprise
+Azure,2023,Cloud Platform,Microsoft cloud platform,Microsoft,Commercial,Enterprise
+Express.js,5,Backend Framework,Fast Node.js web framework,OpenJS Foundation,Open Source,Community
+NestJS,10,Backend Framework,Progressive Node.js framework,Kamil Mysliwiec,Open Source,Community
+Spring Boot,3,Backend Framework,Java application framework,VMware,Open Source,Enterprise
+Django,5,Backend Framework,Python web framework,Django Software Foundation,Open Source,Community

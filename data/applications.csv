@@ -1,0 +1,11 @@
+name,description,status,criticality,owner,technologies
+Portal do Cliente,Sistema de atendimento e gestão de clientes,Active,High,João Silva,Node.js 20|PostgreSQL 16|React 19
+API Gateway,Gateway centralizado para microserviços,Active,Critical,Maria Santos,Node.js 20|Redis 7|Docker 24
+Sistema de Vendas,Plataforma de vendas online,Active,High,Pedro Oliveira,Node.js 18|MySQL 8|Vue.js 3
+Dashboard Analytics,Painel de analytics e relatórios,Active,Medium,Ana Costa,React 19|PostgreSQL 16|TypeScript 5
+Microserviço de Pagamentos,Processamento de transações financeiras,Active,Critical,Carlos Souza,Node.js 20|PostgreSQL 16|Redis 7
+Sistema de Estoque,Controle de inventário e logística,Active,High,Juliana Lima,Angular 17|PostgreSQL 15|TypeScript 5
+API de Notificações,Serviço de envio de notificações,Active,Medium,Roberto Alves,Node.js 20|MongoDB 7|Redis 7
+Portal Administrativo,Interface administrativa interna,Active,High,Fernanda Rocha,React 19|Node.js 20|PostgreSQL 16
+Sistema de Relatórios,Geração automatizada de relatórios,Active,Medium,Lucas Martins,Node.js 18|PostgreSQL 15|Docker 24
+Plataforma Mobile,Aplicativo mobile multiplataforma,Development,High,Camila Ferreira,React 19|Node.js 20|MongoDB 7

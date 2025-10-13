@@ -8,8 +8,9 @@ import { ProcessesView } from './components/views/ProcessesView'
 import { TechnologiesView } from './components/views/TechnologiesView'
 import { DashboardView } from './components/views/DashboardView'
 import { OwnersView } from './components/views/OwnersView'
+import { SkillsView } from './components/views/SkillsView'
 
-type ViewType = 'dashboard' | 'applications' | 'capabilities' | 'interfaces' | 'processes' | 'technologies' | 'owners'
+type ViewType = 'dashboard' | 'applications' | 'capabilities' | 'interfaces' | 'processes' | 'technologies' | 'owners' | 'skills'
 
 function App() {
     const [activeView, setActiveView] = useState<ViewType>('dashboard')
@@ -29,6 +30,8 @@ function App() {
                 return <InterfacesView />
             case 'owners':
                 return <OwnersView />
+            case 'skills':
+                return <SkillsView />
             default:
                 return <DashboardView />
         }

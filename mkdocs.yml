@@ -1,0 +1,248 @@
+site_name: Enterprise Architect
+site_description: OpsPilot é um repositório central de práticas, ferramentas e automações voltadas à condução segura, eficiente e escalável do ciclo de vida de aplicações modernas.
+site_author: Horacio Vasconcellos
+#site_url: https://60pportunities.com.br
+repo_url: https://github.com/horaciovasconcellos/enterprise-architect
+edit_uri: ""
+docs_dir: docs
+repo_name: horaciovasconcellos/enterprise-architect
+
+nav:
+  - Indice                                                            : "index.md"
+  - Informações Gerais:
+     - "Introdução"                                                   : "000-informacao/README.md"
+     - "Política de Segurança"                                        : "000-informacao/SECURITY.md"
+  - Requisitos:
+     - Prompt                                                         : "001-documentacao/PROMPT.md"
+     - Documento de Requisitos do Produto (PRD)                       : "001-documentacao/PRD.md"
+     - Database Setup                                                 : "001-documentacao/DATABASE_SETUP.md"
+     - Passo a Passo                                                  : "001-documentacao/PASSO_A_PASSO.md"
+  - Decisões Arquiteturais                                            : "index-adr.md"
+copyright:  >
+   Copyright &copy; 2024 Documentação
+   <a href="#__consent">Change cookie settings</a>
+extra_css:
+  - styles/app-theme.css
+  - https://unpkg.com/mermaid@8.5.1/dist/mermaid.css
+  - styles/tablesort.css
+  - styles/60pthemas.css
+extra_javascript:
+  - javascripts/tables.js
+  - javascripts/tablesort.js
+validation:
+  omitted_files: ignore
+  absolute_links: ignore
+  unrecognized_links: ignore
+  anchors: ignore
+
+theme:
+  name: "material"
+  icon:
+    repo: fontawesome/brands/git-alt
+  custom_dir: theme
+  highlightjs: true
+  features:
+    - announce.dismiss
+    - commit
+    - content.action.edit
+    - content.code.annotate
+    - content.code.annotation
+    - content.code.copy
+    - content.footnote.tooltips
+    - navigation.instant
+    - navigation.prune
+    - search.highlight
+    - search.highlight
+    - search.share
+    - search.share
+    - search.suggest
+    - search.suggest
+    - version
+  favicon: img/favicon.ico
+
+  palette:
+    - primary: 'deep purple'
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+plugins:
+#  - pdf-export:
+#      combined: true   # Gera um único PDF com todas as páginas
+#      verbose: true
+#  - obsidian-bridge
+  - tags:
+      enabled: true
+  - macros
+  - git-committers:
+      repository: "60pportunities/OpsPilot"
+      branch: main
+      token: !ENV MKDOCS_GIT_COMMITTERS_APIKEY
+
+  - git-authors
+
+  - git-revision-date-localized:
+      enable_git_follow: false
+      type: timeago
+      custom_format: "%d. %B %Y"
+      timezone: America/Sao_Paulo
+      locale: pt
+      fallback_to_build_date: false
+      enable_creation_date: true
+      exclude:
+          - index.md
+      enabled: true
+      strict: true
+  - search
+  - awesome-pages
+  - autorefs
+  - include-markdown:
+      preserve_includer_indent: false
+      dedent: false
+      trailing_newlines: true
+      comments: true
+      rewrite_relative_urls: true
+      heading_offset: 0
+      start: <!--start-->
+      end: <!--end-->
+  - table-reader
+  - glightbox:
+      skip_classes:
+        - glightbox-ignored-image
+      touchNavigation: true
+      loop: true
+      height: auto
+      width: 80%
+  - swagger-ui-tag
+  - render_swagger
+  - mike
+  - mermaid2:
+      version: 10.0.2
+      arguments:
+        theme: slate
+  - minify:
+      minify_html: true
+markdown_extensions:
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - obsidian_media_mkdocs
+  - obsidian_callouts
+  - markdown_include.include:
+      base_path: .
+  - admonition
+  - codehilite
+  - attr_list
+  - extra
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.extra:
+      pymdownx.superfences:
+        custom_fences:
+          - name: mermaid
+            class: mermaid
+            format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - md_in_html
+  - admonition
+  - abbr
+  - def_list
+  - footnotes
+  - meta
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.betterem:
+      smart_enable: all
+extra:
+  repo_owner: "60pportunities"
+  repo_name: "OpsPilot"
+  analytics:
+    provider: google
+    property: G-horacio
+  consent:
+    title: Consentimento
+    description: >-
+       Utilizamos cookies para reconhecer as suas repetidas visitas e preferências, bem como
+       para medir a eficácia da nossa documentação e se os usuários
+       encontre o que eles estão procurando. Com o seu consentimento, você está nos ajudando a
+       melhorar nossa documentação.
+  version:
+    provider: mike
+    default: latest
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/horaciovasconcellos
+    - icon: fontawesome/brands/gitlab
+      link: https://gitlab.com/horaciovasconcellos
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/Horacio_Junior
+      name: Horacio.Vasconcellos on Twitter
+    - icon: fontawesome/brands/mastodon
+      name: Horaci.Vasconcellos on Mastodon
+    - icon: fontawesome/brands/gitter
+      link: https://gitter.im/squidfunk/mkdocs-material
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/u/77678117787
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/hor%C3%A1cio-correa-t-de-vasconcellos-j%C3%BAnior-b7788467/
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/horacio.vasconcellos/
+    - icon: fontawesome/brands/facebook
+      link: https://www.facebook.com/horacio.vasconcellos
+    - icon: fontawesome/brands/medium
+      link: http://60pportunities.com.br
+    - icon: fontawesome/brands/pied-piper-alt
+      link: https://60pportunities.com.br
+    - icon: fontawesome/brands/product-hunt
+      link: https://www.producthunt.com/@horacio_vasconcellos
+    - icon: fontawesome/brands/slack
+      link: https://gitlab.com/horaciovasconcellos
+    - icon: fontawesome/brands/discord
+      link: http://60pportunities.com.br
+    - icon: fontawesome/solid/paper-plane
+      mailto: horacio.vasconcellos@gmail.com
