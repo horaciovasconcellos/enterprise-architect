@@ -73,6 +73,19 @@ CREATE TABLE IF NOT EXISTS applications (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Tabela de Contratos
+CREATE TABLE IF NOT EXISTS contracts (
+    id VARCHAR(36) PRIMARY KEY,
+    application_id VARCHAR(36) NOT NULL,
+    contract_number VARCHAR(100) NOT NULL,
+    contract_cost DECIMAL(15,2),
+    contract_start_date DATE,
+    contract_end_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+);
+
 -- Tabela de Interfaces
 CREATE TABLE IF NOT EXISTS interfaces (
     id VARCHAR(36) PRIMARY KEY,
@@ -141,3 +154,5 @@ CREATE INDEX idx_capabilities_criticality ON capabilities(criticality);
 CREATE INDEX idx_processes_criticality ON processes(criticality);
 CREATE INDEX idx_technologies_category ON technologies(category);
 CREATE INDEX idx_owners_area ON owners(area);
+CREATE INDEX idx_contracts_application ON contracts(application_id);
+CREATE INDEX idx_contracts_dates ON contracts(contract_start_date, contract_end_date);

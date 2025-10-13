@@ -1,6 +1,13 @@
 import pool from '../lib/database'
 import { v4 as uuidv4 } from 'uuid'
 
+export interface Contract {
+  contractNumber: string
+  contractCost: number
+  contractStartDate: string
+  contractEndDate: string
+}
+
 export interface Application {
   id: string
   name: string
@@ -13,6 +20,7 @@ export interface Application {
   functionalFit?: string
   estimatedCost?: number
   currency?: string
+  contracts?: Contract[]
   relatedCapabilities?: string[]
   relatedProcesses?: string[]
   relatedTechnologies?: string[]
@@ -50,6 +58,9 @@ export class ApplicationService {
         app.relatedProcesses = await this.getRelatedProcesses(app.id)
         app.relatedTechnologies = await this.getRelatedTechnologies(app.id)
         app.relatedApplications = await this.getRelatedApplications(app.id)
+        
+        // Buscar contratos
+        app.contracts = await this.getContracts(app.id)
       }
 
       return applications
@@ -89,6 +100,9 @@ export class ApplicationService {
       app.relatedProcesses = await this.getRelatedProcesses(app.id)
       app.relatedTechnologies = await this.getRelatedTechnologies(app.id)
       app.relatedApplications = await this.getRelatedApplications(app.id)
+      
+      // Buscar contratos
+      app.contracts = await this.getContracts(app.id)
 
       return app
     } catch (error) {
@@ -129,6 +143,24 @@ export class ApplicationService {
       }
       if (data.relatedApplications?.length) {
         await this.insertApplicationRelationships(connection, id, data.relatedApplications)
+      }
+
+      // Inserir contratos
+      if (data.contracts?.length) {
+        for (const contract of data.contracts) {
+          const contractId = uuidv4()
+          await connection.execute(`
+            INSERT INTO contracts (id, application_id, contract_number, contract_cost, contract_start_date, contract_end_date)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `, [
+            contractId,
+            id,
+            contract.contractNumber,
+            contract.contractCost,
+            contract.contractStartDate,
+            contract.contractEndDate
+          ])
+        }
       }
 
       await connection.commit()
@@ -182,6 +214,28 @@ export class ApplicationService {
         await this.insertApplicationRelationships(connection, id, data.relatedApplications)
       }
 
+      // Sincronizar contratos (deletar antigos e criar novos)
+      if (data.contracts) {
+        // Deletar contratos existentes
+        await connection.execute('DELETE FROM contracts WHERE application_id = ?', [id])
+        
+        // Criar novos contratos
+        for (const contract of data.contracts) {
+          const contractId = uuidv4()
+          await connection.execute(`
+            INSERT INTO contracts (id, application_id, contract_number, contract_cost, contract_start_date, contract_end_date)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `, [
+            contractId,
+            id,
+            contract.contractNumber,
+            contract.contractCost,
+            contract.contractStartDate,
+            contract.contractEndDate
+          ])
+        }
+      }
+
       await connection.commit()
       
       const updatedApp = await this.findById(id)
@@ -232,6 +286,20 @@ export class ApplicationService {
       SELECT related_application_id FROM application_relationships WHERE application_id = ?
     `, [applicationId])
     return (rows as any[]).map(row => row.related_application_id)
+  }
+
+  private static async getContracts(applicationId: string): Promise<Contract[]> {
+    const [rows] = await pool.execute(`
+      SELECT 
+        contract_number as contractNumber,
+        contract_cost as contractCost,
+        DATE_FORMAT(contract_start_date, '%Y-%m-%d') as contractStartDate,
+        DATE_FORMAT(contract_end_date, '%Y-%m-%d') as contractEndDate
+      FROM contracts
+      WHERE application_id = ?
+      ORDER BY contract_start_date DESC
+    `, [applicationId])
+    return rows as Contract[]
   }
 
   private static async insertCapabilityRelationships(connection: any, applicationId: string, capabilityIds: string[]) {
