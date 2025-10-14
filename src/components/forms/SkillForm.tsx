@@ -41,6 +41,11 @@ export function SkillForm({ skill, onSave, onCancel }: SkillFormProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
+        console.log('📤 Enviando dados do formulário:', {
+            ...formData,
+            technologiesCount: formData.technologies.length,
+            developersCount: formData.developers.length
+        })
         onSave(formData)
     }
 
